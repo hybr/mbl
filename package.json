@@ -1,0 +1,37 @@
+{
+  "name": "miniapp-system",
+  "version": "1.0.0",
+  "description": "Pure JavaScript MiniApp Architecture with PouchDB and Capacitor",
+  "main": "src/app.js",
+  "type": "module",
+  "scripts": {
+    "dev": "npx http-server -p 8080 -c-1",
+    "capacitor:init": "npx cap init",
+    "capacitor:add:android": "npx cap add android",
+    "capacitor:add:ios": "npx cap add ios",
+    "capacitor:sync": "npx cap sync",
+    "capacitor:open:android": "npx cap open android",
+    "capacitor:open:ios": "npx cap open ios",
+    "build:android": "npx cap sync android && npx cap open android",
+    "build:ios": "npx cap sync ios && npx cap open ios"
+  },
+  "keywords": [
+    "miniapp",
+    "pouchdb",
+    "capacitor",
+    "mobile",
+    "offline-first",
+    "javascript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "dependencies": {
+    "@capacitor/android": "^5.0.0",
+    "@capacitor/core": "^5.0.0",
+    "@capacitor/ios": "^5.0.0",
+    "pouchdb": "^8.0.1"
+  }
+}

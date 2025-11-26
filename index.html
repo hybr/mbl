@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Pure JavaScript MiniApp Architecture with PouchDB">
+  <meta name="theme-color" content="#2563eb">
+
+  <title>MiniApp System</title>
+
+  <!-- PouchDB -->
+  <script src="https://cdn.jsdelivr.net/npm/pouchdb@8.0.1/dist/pouchdb.min.js"></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/miniapps.css">
+
+  <!-- Prevent iOS bounce -->
+  <style>
+    body {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-content">
+      <h1 class="app-title">MiniApp System</h1>
+      <div class="header-status">
+        <span id="network-status" class="status-indicator status-online">Online</span>
+        <span id="sync-status" class="status-indicator">Ready</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- App Controls -->
+  <nav class="app-controls">
+    <button id="toggle-notes" class="btn btn-control">Show Notes</button>
+    <button id="toggle-tasks" class="btn btn-control">Show Tasks</button>
+    <button id="toggle-settings" class="btn btn-control">Show Settings</button>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="app-main">
+    <!-- MiniApp Containers -->
+    <div class="miniapp-grid">
+      <!-- Notes Container -->
+      <div id="notes-container" class="miniapp-container" data-miniapp="notes"></div>
+
+      <!-- Tasks Container -->
+      <div id="tasks-container" class="miniapp-container" data-miniapp="tasks"></div>
+
+      <!-- Settings Container -->
+      <div id="settings-container" class="miniapp-container" data-miniapp="settings"></div>
+    </div>
+  </main>
+
+  <!-- Loading Indicator -->
+  <div id="loading-indicator" class="loading-overlay" style="display: none;">
+    <div class="loading-spinner"></div>
+    <p>Loading...</p>
+  </div>
+
+  <!-- Application Scripts (ES6 Modules) -->
+  <script type="module" src="src/app.js"></script>
+
+  <!-- Capacitor Runtime (uncomment when building for mobile) -->
+  <!--
+  <script src="capacitor.js"></script>
+  -->
+
+  <!-- Service Worker Registration (optional for PWA) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        // Uncomment to enable service worker
+        // navigator.serviceWorker.register('/sw.js')
+        //   .then(registration => console.log('SW registered:', registration))
+        //   .catch(err => console.log('SW registration failed:', err));
+      });
+    }
+  </script>
+</body>
+</html>
