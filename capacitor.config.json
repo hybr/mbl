@@ -1,6 +1,6 @@
 {
-  "appId": "com.miniapp.system",
-  "appName": "MiniApp System",
+  "appId": "app.v4l",
+  "appName": "Vocal 4 Local",
   "webDir": ".",
   "bundledWebRuntime": false,
   "server": {
