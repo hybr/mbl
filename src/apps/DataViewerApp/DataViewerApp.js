@@ -11,12 +11,20 @@ class DataViewerApp extends MiniApp {
     super(options);
 
     this.dataFiles = [
+      { name: 'departments.json', path: '/data/departments.json', title: 'Organization Departments' },
+      { name: 'teams.json', path: '/data/teams.json', title: 'Department Teams' },
+      { name: 'designations.json', path: '/data/designations.json', title: 'Job Designations & Levels' },
       { name: 'industries.json', path: '/data/industries.json', title: 'Industries & Sectors' },
       { name: 'organization-types.json', path: '/data/organization-types.json', title: 'Legal Organization Types' },
+
+      { name: 'educational-subjects.json', path: '/data/educational-subjects.json', title: 'Educational Subjects' },
+      { name: 'skills.json', path: '/data/skills.json', title: 'Professional Skills' },
       { name: 'countries.json', path: '/data/countries.json', title: 'Countries' },
+
       { name: 'priority-levels.json', path: '/data/priority-levels.json', title: 'Priority Levels' },
+      { name: 'status-codes.json', path: '/data/status-codes.json', title: 'HTTP Status Codes' },
+
       { name: 'user-roles.json', path: '/data/user-roles.json', title: 'User Roles' },
-      { name: 'status-codes.json', path: '/data/status-codes.json', title: 'HTTP Status Codes' }
     ];
 
     this.currentView = 'list'; // 'list' or 'table'

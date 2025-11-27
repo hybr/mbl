@@ -13,6 +13,7 @@ import { TasksApp } from './apps/TasksApp.js';
 import { SettingsApp } from './apps/SettingsApp.js';
 import { PersonManagementApp } from './apps/PersonManagementApp/PersonManagementApp.js';
 import { DataViewerApp } from './apps/DataViewerApp/DataViewerApp.js';
+import { OrganizationApp } from './apps/OrganizationApp/OrganizationApp.js';
 
 class App {
   constructor() {
@@ -20,6 +21,7 @@ class App {
     this.appManager = null;
     this.miniAppInstances = {};
     this.currentUser = null;
+    this.defaultOrganization = null;
   }
 
   /**
@@ -82,6 +84,7 @@ class App {
     this.appManager.register(SettingsApp);
     this.appManager.register(PersonManagementApp);
     this.appManager.register(DataViewerApp);
+    this.appManager.register(OrganizationApp);
 
     this.logger.info(`Registered ${this.appManager.getRegisteredClasses().length} MiniApps`);
   }
@@ -116,6 +119,15 @@ class App {
       });
     }
 
+    // Organization link
+    const organizationLink = document.getElementById('organization-link');
+    if (organizationLink) {
+      organizationLink.addEventListener('click', async (e) => {
+        e.preventDefault();
+        await this.toggleMiniApp('OrganizationApp', 'organization-container');
+      });
+    }
+
     // Auth link
     const authLink = document.getElementById('auth-link');
     if (authLink) {
@@ -127,6 +139,14 @@ class App {
 
     // Status indicators
     this.updateNetworkStatus();
+
+    // Load and display default organization
+    this.loadDefaultOrganization();
+
+    // Listen for organization changes
+    eventBus.on('organization:setDefault', (org) => {
+      this.setDefaultOrganization(org);
+    });
   }
 
   /**
@@ -138,7 +158,8 @@ class App {
       'TasksApp': 'tasks-container',
       'SettingsApp': 'settings-container',
       'PersonManagementApp': 'person-container',
-      'DataViewerApp': 'dataviewer-container'
+      'DataViewerApp': 'dataviewer-container',
+      'OrganizationApp': 'organization-container'
     };
     return selectorMap[className] || `${className.toLowerCase()}-container`;
   }
@@ -151,11 +172,11 @@ class App {
 
     try {
       // Mount PersonManagementApp first to restore session
-      await this.mountMiniApp('PersonManagementApp', 'person-container');
+      // await this.mountMiniApp('PersonManagementApp', 'person-container');
 
       // Mount Notes and Tasks by default
-      await this.mountMiniApp('NotesApp', 'notes-container');
-      await this.mountMiniApp('TasksApp', 'tasks-container');
+      // await this.mountMiniApp('NotesApp', 'notes-container');
+      // await this.mountMiniApp('TasksApp', 'tasks-container');
 
       this.logger.info('Initial MiniApps mounted');
 
@@ -424,6 +445,73 @@ class App {
       } else {
         authLink.textContent = 'Login';
         authLink.classList.remove('logged-in');
+      }
+    }
+  }
+
+  /**
+   * Load default organization from localStorage
+   */
+  loadDefaultOrganization() {
+    try {
+      const storedOrg = localStorage.getItem('defaultOrganization');
+      if (storedOrg) {
+        this.defaultOrganization = JSON.parse(storedOrg);
+        this.updateOrganizationLink();
+      }
+    } catch (error) {
+      this.logger.error('Failed to load default organization:', error);
+    }
+  }
+
+  /**
+   * Set default organization
+   */
+  setDefaultOrganization(organization) {
+    try {
+      if (organization === null) {
+        this.clearDefaultOrganization();
+        return;
+      }
+
+      this.defaultOrganization = organization;
+      localStorage.setItem('defaultOrganization', JSON.stringify(organization));
+      this.updateOrganizationLink();
+      this.logger.info('Default organization set:', organization.name);
+
+      // Emit event for other apps
+      eventBus.emit('organization:defaultChanged', organization);
+    } catch (error) {
+      this.logger.error('Failed to set default organization:', error);
+    }
+  }
+
+  /**
+   * Clear default organization
+   */
+  clearDefaultOrganization() {
+    this.defaultOrganization = null;
+    localStorage.removeItem('defaultOrganization');
+    this.updateOrganizationLink();
+    eventBus.emit('organization:defaultChanged', null);
+  }
+
+  /**
+   * Update organization link text to show default org
+   */
+  updateOrganizationLink() {
+    const orgLink = document.getElementById('organization-link');
+    if (orgLink) {
+      if (this.defaultOrganization && this.defaultOrganization.name) {
+        // Show first 10 characters of organization name
+        const displayName = this.defaultOrganization.name.substring(0, 10);
+        orgLink.textContent = displayName;
+        orgLink.classList.add('has-default-org');
+        orgLink.title = this.defaultOrganization.name; // Show full name on hover
+      } else {
+        orgLink.textContent = 'Org';
+        orgLink.classList.remove('has-default-org');
+        orgLink.title = 'Organizations';
       }
     }
   }

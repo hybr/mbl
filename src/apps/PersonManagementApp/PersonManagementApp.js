@@ -1049,15 +1049,27 @@ class PersonManagementApp extends MiniApp {
    */
   async findPersonByUsername(username) {
     try {
+      // PouchDB Find doesn't support $regex reliably
+      // So we'll query all persons and filter in memory
       const results = await this.db.query({
         selector: {
-          type: 'person',
-          username: { $regex: new RegExp(`^${username}$`, 'i') }
-        },
-        limit: 1
+          type: 'person'
+        }
       });
 
-      return results.length > 0 ? results[0] : null;
+      // Filter by username (case-insensitive)
+      const normalizedUsername = username.toLowerCase();
+      const found = results.filter(p =>
+        p.username && p.username.toLowerCase() === normalizedUsername
+      );
+
+      this.logger.debug(`Username check for "${username}":`, {
+        totalPersons: results.length,
+        found: found.length,
+        matches: found.map(p => ({ id: p._id, username: p.username }))
+      });
+
+      return found.length > 0 ? found[0] : null;
     } catch (error) {
       this.logger.error('Failed to find person by username:', error);
       return null;

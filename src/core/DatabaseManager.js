@@ -297,22 +297,34 @@ class DatabaseManager {
    */
   async query(options = {}) {
     try {
-      const { type, limit, skip, sort } = options;
-
-      let query = {
-        include_docs: true,
-        ...options
-      };
-
-      // Filter by type if specified
-      if (type) {
-        query.selector = { type, ...(options.selector || {}) };
-        const result = await this.db.find(query);
+      // If selector is provided, use find()
+      if (options.selector) {
+        const result = await this.db.find(options);
+        this.logger.debug('Query with selector returned:', result.docs.length, 'documents');
         return result.docs;
       }
 
-      // Get all documents
+      // Legacy support: if type is specified without selector
+      if (options.type) {
+        const query = {
+          selector: { type: options.type },
+          limit: options.limit,
+          skip: options.skip,
+          sort: options.sort
+        };
+        const result = await this.db.find(query);
+        this.logger.debug('Query with type returned:', result.docs.length, 'documents');
+        return result.docs;
+      }
+
+      // Get all documents using allDocs
+      const query = {
+        include_docs: true,
+        limit: options.limit,
+        skip: options.skip
+      };
       const result = await this.db.allDocs(query);
+      this.logger.debug('Query allDocs returned:', result.rows.length, 'documents');
       return result.rows.map(row => row.doc).filter(doc => doc);
 
     } catch (error) {

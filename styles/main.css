@@ -158,6 +158,16 @@ body {
   transform: translateY(-1px);
 }
 
+.header-link.has-default-org {
+  color: var(--success-color);
+  background-color: rgba(16, 185, 129, 0.1);
+  font-weight: 600;
+}
+
+.header-link.has-default-org:hover {
+  background-color: rgba(16, 185, 129, 0.2);
+}
+
 .app-controls {
   position: fixed;
   top: 60px;

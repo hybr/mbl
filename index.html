@@ -10,6 +10,7 @@
 
   <!-- PouchDB -->
   <script src="https://cdn.jsdelivr.net/npm/pouchdb@8.0.1/dist/pouchdb.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pouchdb@8.0.1/dist/pouchdb.find.min.js"></script>
 
   <!-- Styles -->
   <link rel="stylesheet" href="styles/main.css">
@@ -17,6 +18,7 @@
   <link rel="stylesheet" href="styles/miniapps.css">
   <link rel="stylesheet" href="src/apps/PersonManagementApp/PersonManagementApp.css">
   <link rel="stylesheet" href="src/apps/DataViewerApp/DataViewerApp.css">
+  <link rel="stylesheet" href="src/apps/OrganizationApp/OrganizationApp.css">
 
   <!-- Prevent iOS bounce -->
   <style>
@@ -34,9 +36,9 @@
     <div class="header-content">
       <h1 class="app-title">MiniApp System</h1>
       <div class="header-status">
-        <a href="#" id="data-viewer-link" class="header-link">📊 Data</a>
-        <span id="network-status" class="status-indicator status-online">Online</span>
-        <span id="sync-status" class="status-indicator">Ready</span>
+        <a href="#" id="organization-link" class="header-link">Org</a>
+        <!-- <span id="network-status" class="status-indicator status-online">Online</span> -->
+        <!-- <span id="sync-status" class="status-indicator">Ready</span> -->
         <a href="#" id="auth-link" class="auth-link">Login</a>
       </div>
     </div>

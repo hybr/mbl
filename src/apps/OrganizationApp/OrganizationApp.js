@@ -23,6 +23,10 @@ class OrganizationApp extends MiniApp {
     this.currentView = 'list'; // 'list', 'edit', 'view'
     this.currentUser = null;
     this.components = {};
+
+    // Track which organizations user has access to
+    this.myOrganizations = []; // Organizations I created
+    this.workerOrganizations = []; // Organizations where I'm a worker
   }
 
   /**
@@ -30,6 +34,9 @@ class OrganizationApp extends MiniApp {
    */
   async onInit() {
     this.logger.info('Initializing OrganizationApp');
+
+    // Initialize organizations array to prevent undefined errors
+    this.organizations = [];
 
     // Load reference data
     await this.loadOrganizationTypes();
@@ -44,7 +51,7 @@ class OrganizationApp extends MiniApp {
     });
 
     // Listen for login/logout events
-    this.on('person:login', (user) => {
+    this.subscribe('person:login', (user) => {
       this.currentUser = user;
       this.loadOrganizations();
       if (this.isRendered) {
@@ -52,7 +59,7 @@ class OrganizationApp extends MiniApp {
       }
     });
 
-    this.on('person:logout', () => {
+    this.subscribe('person:logout', () => {
       this.currentUser = null;
       this.organizations = [];
       if (this.isRendered) {
@@ -63,7 +70,7 @@ class OrganizationApp extends MiniApp {
     // Check if user is already logged in
     await this.checkCurrentUser();
 
-    // Load organizations
+    // Load organizations for current user
     await this.loadOrganizations();
   }
 
@@ -140,29 +147,73 @@ class OrganizationApp extends MiniApp {
 
   /**
    * Load organizations for current user
+   * Includes both organizations created by user and organizations where user is a worker
    */
   async loadOrganizations() {
     try {
       if (!this.db) {
         this.logger.warn('Database not available');
+        this.organizations = [];
+        this.myOrganizations = [];
+        this.workerOrganizations = [];
         return;
       }
 
       if (!this.currentUser) {
         this.organizations = [];
+        this.myOrganizations = [];
+        this.workerOrganizations = [];
         return;
       }
 
-      const orgs = await this.db.query({
+      // Load all organizations (we'll filter in memory for better reliability)
+      const allOrgs = await this.db.query({
         selector: {
-          type: 'organization',
-          createdBy: this.currentUser._id
-        },
-        sort: [{ createdAt: 'desc' }]
+          type: 'organization'
+        }
       });
 
-      this.organizations = orgs;
-      this.logger.debug(`Loaded ${orgs.length} organizations`);
+      // Filter organizations created by current user
+      this.myOrganizations = allOrgs.filter(org =>
+        org && org.name && org.createdBy === this.currentUser._id
+      );
+
+      // Filter organizations where current user is a worker
+      this.workerOrganizations = allOrgs.filter(org =>
+        org && org.name &&
+        org.workers &&
+        Array.isArray(org.workers) &&
+        org.workers.some(worker =>
+          worker.userId === this.currentUser._id || worker === this.currentUser._id
+        )
+      );
+
+      // Combine both lists (remove duplicates if user is both creator and worker)
+      const orgMap = new Map();
+
+      // Add created organizations
+      this.myOrganizations.forEach(org => {
+        orgMap.set(org._id, { ...org, _userRole: 'owner' });
+      });
+
+      // Add worker organizations (if not already in map)
+      this.workerOrganizations.forEach(org => {
+        if (!orgMap.has(org._id)) {
+          orgMap.set(org._id, { ...org, _userRole: 'worker' });
+        }
+      });
+
+      // Convert map to array and sort by creation date
+      this.organizations = Array.from(orgMap.values()).sort((a, b) => {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+
+      this.logger.info(`Loaded ${this.organizations.length} organizations (${this.myOrganizations.length} owned, ${this.workerOrganizations.length} as worker)`);
+
+      // Auto-select first organization if none is selected
+      if (this.organizations.length > 0) {
+        this.checkAndSetDefaultOrganization();
+      }
 
       // Update UI if rendered
       if (this.isRendered) {
@@ -170,6 +221,9 @@ class OrganizationApp extends MiniApp {
       }
     } catch (error) {
       this.logger.error('Failed to load organizations:', error);
+      this.organizations = [];
+      this.myOrganizations = [];
+      this.workerOrganizations = [];
     }
   }
 
@@ -228,6 +282,14 @@ class OrganizationApp extends MiniApp {
         onClick: () => this.showEditView(null)
       });
       actions.appendChild(this.components.createBtn.create());
+
+      // Add Readonly Data button
+      this.components.readonlyDataBtn = new Button({
+        text: 'Readonly Data',
+        className: 'btn btn-secondary',
+        onClick: () => this.openDataViewer()
+      });
+      actions.appendChild(this.components.readonlyDataBtn.create());
     } else {
       const loginMsg = this.createElement('div', {
         className: 'login-message'
@@ -265,7 +327,17 @@ class OrganizationApp extends MiniApp {
    * Render organization card
    */
   renderOrganizationCard(org) {
-    const card = this.createElement('div', { className: 'org-card' });
+    // Safety check for required fields
+    if (!org || !org.name) {
+      this.logger.warn('Skipping organization with missing name:', org);
+      return this.createElement('div', { className: 'org-card-error' }, ['Invalid organization data']);
+    }
+
+    // Check if this is the default organization
+    const isDefault = this.isDefaultOrganization(org);
+    const cardClass = isDefault ? 'org-card org-card-active' : 'org-card';
+
+    const card = this.createElement('div', { className: cardClass });
 
     // Logo or placeholder
     const logoContainer = this.createElement('div', { className: 'org-logo-container' });
@@ -300,6 +372,16 @@ class OrganizationApp extends MiniApp {
 
     const metadata = this.createElement('div', { className: 'org-metadata' });
 
+    // Show user's role in the organization
+    if (org._userRole) {
+      const roleClass = org._userRole === 'owner' ? 'org-role-owner' : 'org-role-worker';
+      const roleText = org._userRole === 'owner' ? '👑 Owner' : '👤 Worker';
+      const role = this.createElement('span', {
+        className: `org-meta-item ${roleClass}`
+      }, [roleText]);
+      metadata.appendChild(role);
+    }
+
     if (orgType) {
       const type = this.createElement('span', { className: 'org-meta-item' }, [
         `${orgType.abbreviation || orgType.type_name}`
@@ -327,6 +409,17 @@ class OrganizationApp extends MiniApp {
     // Actions
     const actions = this.createElement('div', { className: 'org-card-actions' });
 
+    // Set as Default button - show different text/style if already default
+    const setDefaultBtnClass = isDefault
+      ? 'btn btn-success btn-small org-default-btn-active'
+      : 'btn btn-secondary btn-small';
+    const setDefaultBtnText = isDefault ? '✓ Default' : 'Set as Default';
+
+    const setDefaultBtn = this.createElement('button', {
+      className: setDefaultBtnClass,
+      onClick: () => this.setAsDefaultOrganization(org)
+    }, [setDefaultBtnText]);
+
     const viewBtn = this.createElement('button', {
       className: 'btn btn-secondary btn-small',
       onClick: () => this.showViewDetails(org)
@@ -342,6 +435,7 @@ class OrganizationApp extends MiniApp {
       onClick: () => this.deleteOrganization(org)
     }, ['Delete']);
 
+    actions.appendChild(setDefaultBtn);
     actions.appendChild(viewBtn);
     actions.appendChild(editBtn);
     actions.appendChild(deleteBtn);
@@ -769,6 +863,24 @@ class OrganizationApp extends MiniApp {
   }
 
   /**
+   * Open DataViewerApp
+   */
+  openDataViewer() {
+    // Emit event to toggle DataViewerApp
+    this.emit('app:toggleMiniApp', {
+      className: 'DataViewerApp',
+      containerSelector: 'dataviewer-container'
+    });
+
+    // Alternative: Use the global app instance if available
+    if (window.app && window.app.toggleMiniApp) {
+      window.app.toggleMiniApp('DataViewerApp', 'dataviewer-container');
+    }
+
+    this.logger.info('Opening DataViewerApp');
+  }
+
+  /**
    * Validate subdomain format
    */
   validateSubdomain(subdomain) {
@@ -789,9 +901,16 @@ class OrganizationApp extends MiniApp {
         }
       });
 
+      this.logger.debug(`Subdomain uniqueness check for "${subdomain}":`, {
+        found: existing.length,
+        organizations: existing.map(o => ({ id: o._id, subdomain: o.subdomain })),
+        currentOrgId
+      });
+
       // If editing, exclude current organization from check
       if (currentOrgId) {
-        return existing.every(org => org._id === currentOrgId);
+        const otherOrgs = existing.filter(org => org._id !== currentOrgId);
+        return otherOrgs.length === 0;
       }
 
       return existing.length === 0;
@@ -851,7 +970,7 @@ class OrganizationApp extends MiniApp {
     // Check subdomain uniqueness
     const isUnique = await this.isSubdomainUnique(subdomain, this.currentOrganization?._id);
     if (!isUnique) {
-      Notification.error('This subdomain is already taken');
+      Notification.error(`Subdomain "${subdomain}" is already taken. Please choose another.`);
       return;
     }
 
@@ -870,15 +989,17 @@ class OrganizationApp extends MiniApp {
         phone,
         email,
         createdBy: this.currentUser._id,
-        createdByUsername: this.currentUser.username
+        createdByUsername: this.currentUser.username,
+        workers: [] // Initialize empty workers array
       };
 
       if (isEdit) {
-        // Update existing
+        // Update existing - preserve workers array
         orgData._id = this.currentOrganization._id;
         orgData._rev = this.currentOrganization._rev;
         orgData.createdAt = this.currentOrganization.createdAt;
         orgData.updatedAt = new Date().toISOString();
+        orgData.workers = this.currentOrganization.workers || []; // Preserve workers
 
         await this.db.update(orgData);
         Notification.success('Organization updated successfully');
@@ -914,9 +1035,18 @@ class OrganizationApp extends MiniApp {
     }
 
     try {
+      // Check if this is the default organization
+      const isDefault = this.isDefaultOrganization(org);
+
       await this.db.delete(org);
       Notification.success('Organization deleted successfully');
       this.logger.info('Organization deleted:', org._id);
+
+      // If deleted org was default, clear it and let auto-select handle setting new default
+      if (isDefault) {
+        localStorage.removeItem('defaultOrganization');
+        this.emit('organization:setDefault', null);
+      }
 
       // Emit event
       this.emit('organization:deleted', org);
@@ -924,6 +1054,77 @@ class OrganizationApp extends MiniApp {
     } catch (error) {
       this.logger.error('Failed to delete organization:', error);
       Notification.error('Failed to delete organization. Please try again.');
+    }
+  }
+
+  /**
+   * Check if an organization is the default organization
+   */
+  isDefaultOrganization(org) {
+    try {
+      const storedOrg = localStorage.getItem('defaultOrganization');
+      if (!storedOrg) return false;
+
+      const parsed = JSON.parse(storedOrg);
+      return parsed._id === org._id;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Check if there's a default organization, if not set the first one
+   */
+  checkAndSetDefaultOrganization() {
+    try {
+      // Check if default organization exists in localStorage
+      const storedOrg = localStorage.getItem('defaultOrganization');
+
+      if (!storedOrg && this.organizations.length > 0) {
+        // No default set, select first organization
+        const firstOrg = this.organizations[0];
+        this.logger.info('Auto-selecting first organization as default:', firstOrg.name);
+        this.setAsDefaultOrganization(firstOrg, true); // true = silent mode
+      } else if (storedOrg) {
+        // Verify the stored organization still exists in current list
+        const parsed = JSON.parse(storedOrg);
+        const exists = this.organizations.some(org => org._id === parsed._id);
+
+        if (!exists && this.organizations.length > 0) {
+          // Stored org no longer exists, select first
+          const firstOrg = this.organizations[0];
+          this.logger.info('Previous default org not found, auto-selecting first:', firstOrg.name);
+          this.setAsDefaultOrganization(firstOrg, true);
+        }
+      }
+    } catch (error) {
+      this.logger.error('Failed to check/set default organization:', error);
+    }
+  }
+
+  /**
+   * Set organization as default
+   */
+  setAsDefaultOrganization(org, silent = false) {
+    try {
+      this.logger.info('Setting default organization:', org.name);
+
+      // Emit event to main app
+      this.emit('organization:setDefault', org);
+
+      if (!silent) {
+        Notification.success(`"${org.name}" set as default organization`);
+      }
+
+      // Trigger re-render to update active state
+      if (this.isRendered && this.currentView === 'list') {
+        this.render();
+      }
+    } catch (error) {
+      this.logger.error('Failed to set default organization:', error);
+      if (!silent) {
+        Notification.error('Failed to set default organization. Please try again.');
+      }
     }
   }
 

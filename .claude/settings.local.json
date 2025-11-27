@@ -7,7 +7,9 @@
       "Bash(cmd /c move \"src\\miniapps\\PersonManagementApp.js\" \"src\\miniapps\\PersonManagementApp\\PersonManagementApp.js\")",
       "Bash(cmd /c:*)",
       "Bash(find:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(npm start)",
+      "Bash(npm run dev:*)"
     ],
     "deny": [],
     "ask": []

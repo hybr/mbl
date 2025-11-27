@@ -1,0 +1,402 @@
+[
+  {
+    "id": 1,
+    "code": "EXEC",
+    "name": "Executive Management",
+    "category": "Leadership",
+    "description": "Top-level leadership and strategic decision making",
+    "icon": "👔",
+    "typical_roles": ["CEO", "President", "Managing Director", "Chief of Staff"],
+    "common_in": ["All organizations"]
+  },
+  {
+    "id": 2,
+    "code": "HR",
+    "name": "Human Resources",
+    "category": "Support",
+    "description": "Employee management, recruitment, training, and benefits",
+    "icon": "👥",
+    "typical_roles": ["HR Manager", "Recruiter", "HR Business Partner", "Compensation Analyst"],
+    "common_in": ["All organizations"]
+  },
+  {
+    "id": 3,
+    "code": "FIN",
+    "name": "Finance",
+    "category": "Finance",
+    "description": "Financial planning, accounting, and reporting",
+    "icon": "💰",
+    "typical_roles": ["CFO", "Financial Analyst", "Accountant", "Controller"],
+    "common_in": ["All organizations"]
+  },
+  {
+    "id": 4,
+    "code": "ACCT",
+    "name": "Accounting",
+    "category": "Finance",
+    "description": "Bookkeeping, accounts payable/receivable, payroll",
+    "icon": "📊",
+    "typical_roles": ["Accountant", "AP/AR Specialist", "Payroll Manager", "Tax Accountant"],
+    "common_in": ["Medium to large organizations"]
+  },
+  {
+    "id": 5,
+    "code": "IT",
+    "name": "Information Technology",
+    "category": "Technology",
+    "description": "IT infrastructure, systems administration, and support",
+    "icon": "💻",
+    "typical_roles": ["CTO", "IT Manager", "System Administrator", "Network Engineer"],
+    "common_in": ["All organizations"]
+  },
+  {
+    "id": 6,
+    "code": "ENG",
+    "name": "Engineering",
+    "category": "Technology",
+    "description": "Product development, software engineering, R&D",
+    "icon": "⚙️",
+    "typical_roles": ["VP Engineering", "Software Engineer", "DevOps Engineer", "QA Engineer"],
+    "common_in": ["Tech companies, manufacturers"]
+  },
+  {
+    "id": 7,
+    "code": "PROD",
+    "name": "Product Management",
+    "category": "Product",
+    "description": "Product strategy, roadmap, and feature prioritization",
+    "icon": "📦",
+    "typical_roles": ["CPO", "Product Manager", "Product Owner", "Product Analyst"],
+    "common_in": ["Tech companies, consumer goods"]
+  },
+  {
+    "id": 8,
+    "code": "DESIGN",
+    "name": "Design",
+    "category": "Product",
+    "description": "User experience, interface design, and creative services",
+    "icon": "🎨",
+    "typical_roles": ["Design Director", "UX Designer", "UI Designer", "Graphic Designer"],
+    "common_in": ["Tech companies, agencies"]
+  },
+  {
+    "id": 9,
+    "code": "SALES",
+    "name": "Sales",
+    "category": "Revenue",
+    "description": "Direct sales, account management, and revenue generation",
+    "icon": "💼",
+    "typical_roles": ["VP Sales", "Sales Manager", "Account Executive", "Sales Representative"],
+    "common_in": ["All B2B/B2C organizations"]
+  },
+  {
+    "id": 10,
+    "code": "MKTG",
+    "name": "Marketing",
+    "category": "Revenue",
+    "description": "Brand management, campaigns, and market research",
+    "icon": "📢",
+    "typical_roles": ["CMO", "Marketing Manager", "Content Marketer", "Marketing Analyst"],
+    "common_in": ["All organizations"]
+  },
+  {
+    "id": 11,
+    "code": "BD",
+    "name": "Business Development",
+    "category": "Revenue",
+    "description": "Strategic partnerships, new market opportunities",
+    "icon": "🤝",
+    "typical_roles": ["VP Business Development", "BD Manager", "Partnership Manager"],
+    "common_in": ["Growth-focused organizations"]
+  },
+  {
+    "id": 12,
+    "code": "CS",
+    "name": "Customer Success",
+    "category": "Customer",
+    "description": "Customer onboarding, retention, and account growth",
+    "icon": "🌟",
+    "typical_roles": ["VP Customer Success", "CSM", "Customer Success Specialist"],
+    "common_in": ["SaaS, subscription businesses"]
+  },
+  {
+    "id": 13,
+    "code": "SUPPORT",
+    "name": "Customer Support",
+    "category": "Customer",
+    "description": "Technical support, customer service, helpdesk",
+    "icon": "🎧",
+    "typical_roles": ["Support Manager", "Support Engineer", "Customer Service Rep"],
+    "common_in": ["All customer-facing organizations"]
+  },
+  {
+    "id": 14,
+    "code": "OPS",
+    "name": "Operations",
+    "category": "Operations",
+    "description": "Business operations, process optimization, efficiency",
+    "icon": "⚡",
+    "typical_roles": ["COO", "Operations Manager", "Operations Analyst"],
+    "common_in": ["All organizations"]
+  },
+  {
+    "id": 15,
+    "code": "SUPPLY",
+    "name": "Supply Chain",
+    "category": "Operations",
+    "description": "Procurement, logistics, inventory management",
+    "icon": "🚚",
+    "typical_roles": ["Supply Chain Manager", "Procurement Specialist", "Logistics Coordinator"],
+    "common_in": ["Manufacturing, retail, e-commerce"]
+  },
+  {
+    "id": 16,
+    "code": "MFG",
+    "name": "Manufacturing",
+    "category": "Operations",
+    "description": "Production, assembly, quality control",
+    "icon": "🏭",
+    "typical_roles": ["Plant Manager", "Production Supervisor", "Quality Engineer"],
+    "common_in": ["Manufacturing companies"]
+  },
+  {
+    "id": 17,
+    "code": "RD",
+    "name": "Research & Development",
+    "category": "Innovation",
+    "description": "Innovation, research, new product development",
+    "icon": "🔬",
+    "typical_roles": ["R&D Director", "Research Scientist", "Innovation Manager"],
+    "common_in": ["Tech, pharma, manufacturing"]
+  },
+  {
+    "id": 18,
+    "code": "DATA",
+    "name": "Data & Analytics",
+    "category": "Technology",
+    "description": "Data science, business intelligence, analytics",
+    "icon": "📈",
+    "typical_roles": ["Chief Data Officer", "Data Scientist", "Business Analyst", "BI Developer"],
+    "common_in": ["Data-driven organizations"]
+  },
+  {
+    "id": 19,
+    "code": "SEC",
+    "name": "Security",
+    "category": "Technology",
+    "description": "Information security, cybersecurity, compliance",
+    "icon": "🔒",
+    "typical_roles": ["CISO", "Security Engineer", "Security Analyst", "Compliance Officer"],
+    "common_in": ["Tech companies, financial services"]
+  },
+  {
+    "id": 20,
+    "code": "LEGAL",
+    "name": "Legal",
+    "category": "Compliance",
+    "description": "Legal counsel, contracts, regulatory compliance",
+    "icon": "⚖️",
+    "typical_roles": ["General Counsel", "Legal Counsel", "Paralegal", "Compliance Manager"],
+    "common_in": ["Medium to large organizations"]
+  },
+  {
+    "id": 21,
+    "code": "COMP",
+    "name": "Compliance",
+    "category": "Compliance",
+    "description": "Regulatory compliance, risk management, auditing",
+    "icon": "✓",
+    "typical_roles": ["Compliance Officer", "Risk Manager", "Internal Auditor"],
+    "common_in": ["Regulated industries"]
+  },
+  {
+    "id": 22,
+    "code": "ADMIN",
+    "name": "Administration",
+    "category": "Support",
+    "description": "Office management, facilities, administrative support",
+    "icon": "📋",
+    "typical_roles": ["Office Manager", "Admin Assistant", "Receptionist", "Facilities Manager"],
+    "common_in": ["All organizations"]
+  },
+  {
+    "id": 23,
+    "code": "FACILITIES",
+    "name": "Facilities Management",
+    "category": "Support",
+    "description": "Building maintenance, workplace services, safety",
+    "icon": "🏢",
+    "typical_roles": ["Facilities Manager", "Maintenance Supervisor", "Safety Officer"],
+    "common_in": ["Organizations with physical locations"]
+  },
+  {
+    "id": 24,
+    "code": "PR",
+    "name": "Public Relations",
+    "category": "Communications",
+    "description": "Media relations, corporate communications, PR",
+    "icon": "📰",
+    "typical_roles": ["PR Manager", "Communications Director", "Media Relations Specialist"],
+    "common_in": ["Large organizations, public companies"]
+  },
+  {
+    "id": 25,
+    "code": "COMMS",
+    "name": "Internal Communications",
+    "category": "Communications",
+    "description": "Employee communications, internal engagement",
+    "icon": "📣",
+    "typical_roles": ["Internal Communications Manager", "Employee Engagement Specialist"],
+    "common_in": ["Large organizations"]
+  },
+  {
+    "id": 26,
+    "code": "TRAINING",
+    "name": "Training & Development",
+    "category": "Learning",
+    "description": "Employee training, professional development, L&D",
+    "icon": "📚",
+    "typical_roles": ["Training Manager", "Learning Specialist", "Corporate Trainer"],
+    "common_in": ["Medium to large organizations"]
+  },
+  {
+    "id": 27,
+    "code": "QA",
+    "name": "Quality Assurance",
+    "category": "Quality",
+    "description": "Quality control, testing, standards compliance",
+    "icon": "✅",
+    "typical_roles": ["QA Manager", "QA Engineer", "Quality Inspector", "Test Lead"],
+    "common_in": ["Manufacturing, software, services"]
+  },
+  {
+    "id": 28,
+    "code": "PM",
+    "name": "Project Management",
+    "category": "Delivery",
+    "description": "Project planning, execution, and delivery",
+    "icon": "📊",
+    "typical_roles": ["Project Manager", "Program Manager", "PMO Director", "Scrum Master"],
+    "common_in": ["All project-based organizations"]
+  },
+  {
+    "id": 29,
+    "code": "STRATEGY",
+    "name": "Strategy & Planning",
+    "category": "Leadership",
+    "description": "Corporate strategy, business planning, transformation",
+    "icon": "🎯",
+    "typical_roles": ["Chief Strategy Officer", "Strategy Manager", "Business Planner"],
+    "common_in": ["Large organizations"]
+  },
+  {
+    "id": 30,
+    "code": "PROCUREMENT",
+    "name": "Procurement",
+    "category": "Operations",
+    "description": "Vendor management, purchasing, sourcing",
+    "icon": "🛒",
+    "typical_roles": ["Procurement Manager", "Buyer", "Sourcing Specialist"],
+    "common_in": ["Medium to large organizations"]
+  },
+  {
+    "id": 31,
+    "code": "REV-OPS",
+    "name": "Revenue Operations",
+    "category": "Revenue",
+    "description": "Revenue strategy, sales ops, marketing ops alignment",
+    "icon": "💹",
+    "typical_roles": ["VP Revenue Operations", "Revenue Operations Manager", "Sales Ops Analyst"],
+    "common_in": ["SaaS, tech companies"]
+  },
+  {
+    "id": 32,
+    "code": "CUSTOMER-EXP",
+    "name": "Customer Experience",
+    "category": "Customer",
+    "description": "Customer journey, experience design, satisfaction",
+    "icon": "😊",
+    "typical_roles": ["CX Manager", "Customer Experience Designer", "Voice of Customer Lead"],
+    "common_in": ["Customer-centric organizations"]
+  },
+  {
+    "id": 33,
+    "code": "CONTENT",
+    "name": "Content",
+    "category": "Marketing",
+    "description": "Content creation, copywriting, editorial",
+    "icon": "✍️",
+    "typical_roles": ["Content Manager", "Content Writer", "Content Strategist", "Editor"],
+    "common_in": ["Media, marketing agencies, tech"]
+  },
+  {
+    "id": 34,
+    "code": "GROWTH",
+    "name": "Growth",
+    "category": "Revenue",
+    "description": "Growth marketing, user acquisition, optimization",
+    "icon": "🚀",
+    "typical_roles": ["VP Growth", "Growth Manager", "Growth Marketer", "Conversion Specialist"],
+    "common_in": ["Startups, tech companies"]
+  },
+  {
+    "id": 35,
+    "code": "PEOPLE-OPS",
+    "name": "People Operations",
+    "category": "Support",
+    "description": "Employee experience, culture, workplace operations",
+    "icon": "💙",
+    "typical_roles": ["People Ops Manager", "Culture Lead", "Employee Experience Manager"],
+    "common_in": ["Modern tech companies"]
+  },
+  {
+    "id": 36,
+    "code": "INFOSEC",
+    "name": "Information Security",
+    "category": "Technology",
+    "description": "Data security, access management, security policies",
+    "icon": "🛡️",
+    "typical_roles": ["Information Security Manager", "Security Architect", "Security Auditor"],
+    "common_in": ["All organizations with sensitive data"]
+  },
+  {
+    "id": 37,
+    "code": "DEVOPS",
+    "name": "DevOps",
+    "category": "Technology",
+    "description": "CI/CD, infrastructure automation, site reliability",
+    "icon": "🔧",
+    "typical_roles": ["DevOps Engineer", "SRE", "Platform Engineer", "Release Manager"],
+    "common_in": ["Software companies"]
+  },
+  {
+    "id": 38,
+    "code": "PARTNERSHIPS",
+    "name": "Partnerships",
+    "category": "Revenue",
+    "description": "Strategic alliances, channel partners, integrations",
+    "icon": "🤝",
+    "typical_roles": ["Partnerships Manager", "Channel Manager", "Alliance Manager"],
+    "common_in": ["B2B companies"]
+  },
+  {
+    "id": 39,
+    "code": "EVENTS",
+    "name": "Events & Community",
+    "category": "Marketing",
+    "description": "Event planning, conferences, community management",
+    "icon": "🎪",
+    "typical_roles": ["Events Manager", "Community Manager", "Conference Coordinator"],
+    "common_in": ["B2B, consumer brands"]
+  },
+  {
+    "id": 40,
+    "code": "TREASURY",
+    "name": "Treasury",
+    "category": "Finance",
+    "description": "Cash management, investments, financial risk",
+    "icon": "💵",
+    "typical_roles": ["Treasurer", "Treasury Analyst", "Cash Manager"],
+    "common_in": ["Large organizations"]
+  }
+]
