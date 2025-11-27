@@ -8,15 +8,18 @@ import { AppManager } from './core/AppManager.js';
 import { eventBus } from './core/EventBus.js';
 
 // Import MiniApps
-import { NotesApp } from './miniapps/NotesApp.js';
-import { TasksApp } from './miniapps/TasksApp.js';
-import { SettingsApp } from './miniapps/SettingsApp.js';
+import { NotesApp } from './apps/NotesApp.js';
+import { TasksApp } from './apps/TasksApp.js';
+import { SettingsApp } from './apps/SettingsApp.js';
+import { PersonManagementApp } from './apps/PersonManagementApp/PersonManagementApp.js';
+import { DataViewerApp } from './apps/DataViewerApp/DataViewerApp.js';
 
 class App {
   constructor() {
     this.logger = LoggerFactory.getLogger('App');
     this.appManager = null;
     this.miniAppInstances = {};
+    this.currentUser = null;
   }
 
   /**
@@ -53,11 +56,12 @@ class App {
       // Setup UI event listeners
       this.setupUI();
 
-      // Mount initial MiniApps
-      await this.mountInitialApps();
-
-      // Setup global event listeners
+      // Setup global event listeners BEFORE mounting apps
+      // This ensures listeners are ready when session is restored
       this.setupEventListeners();
+
+      // Mount initial MiniApps (this will restore session)
+      await this.mountInitialApps();
 
       this.logger.info('Application initialized successfully');
 
@@ -76,6 +80,8 @@ class App {
     this.appManager.register(NotesApp);
     this.appManager.register(TasksApp);
     this.appManager.register(SettingsApp);
+    this.appManager.register(PersonManagementApp);
+    this.appManager.register(DataViewerApp);
 
     this.logger.info(`Registered ${this.appManager.getRegisteredClasses().length} MiniApps`);
   }
@@ -101,8 +107,40 @@ class App {
       toggleSettingsBtn.addEventListener('click', () => this.toggleMiniApp('SettingsApp', 'settings-container'));
     }
 
+    // Data Viewer link
+    const dataViewerLink = document.getElementById('data-viewer-link');
+    if (dataViewerLink) {
+      dataViewerLink.addEventListener('click', async (e) => {
+        e.preventDefault();
+        await this.toggleMiniApp('DataViewerApp', 'dataviewer-container');
+      });
+    }
+
+    // Auth link
+    const authLink = document.getElementById('auth-link');
+    if (authLink) {
+      authLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.handleAuthClick();
+      });
+    }
+
     // Status indicators
     this.updateNetworkStatus();
+  }
+
+  /**
+   * Get container selector for a MiniApp class
+   */
+  getContainerSelector(className) {
+    const selectorMap = {
+      'NotesApp': 'notes-container',
+      'TasksApp': 'tasks-container',
+      'SettingsApp': 'settings-container',
+      'PersonManagementApp': 'person-container',
+      'DataViewerApp': 'dataviewer-container'
+    };
+    return selectorMap[className] || `${className.toLowerCase()}-container`;
   }
 
   /**
@@ -112,6 +150,9 @@ class App {
     this.logger.info('Mounting initial MiniApps...');
 
     try {
+      // Mount PersonManagementApp first to restore session
+      await this.mountMiniApp('PersonManagementApp', 'person-container');
+
       // Mount Notes and Tasks by default
       await this.mountMiniApp('NotesApp', 'notes-container');
       await this.mountMiniApp('TasksApp', 'tasks-container');
@@ -128,9 +169,49 @@ class App {
    */
   async mountMiniApp(className, containerSelector) {
     try {
-      const container = document.getElementById(containerSelector);
+      const grid = document.getElementById('miniapp-grid');
+      if (!grid) {
+        throw new Error('MiniApp grid not found');
+      }
+
+      // Check if container already exists
+      let container = document.getElementById(containerSelector);
+
       if (!container) {
-        throw new Error(`Container not found: ${containerSelector}`);
+        // Create wrapper with close button
+        const wrapper = document.createElement('div');
+        wrapper.className = 'miniapp-wrapper';
+        wrapper.id = `${containerSelector}-wrapper`;
+
+        // Create close button
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'miniapp-close-btn';
+        closeBtn.innerHTML = '&times;';
+        closeBtn.title = 'Close';
+        closeBtn.setAttribute('aria-label', 'Close');
+        closeBtn.addEventListener('click', async () => {
+          await this.unmountMiniApp(className);
+        });
+
+        // Create container
+        container = document.createElement('div');
+        container.id = containerSelector;
+        container.className = 'miniapp-container';
+        container.dataset.miniapp = className.toLowerCase().replace('app', '');
+
+        // Assemble wrapper
+        wrapper.appendChild(closeBtn);
+        wrapper.appendChild(container);
+
+        // Prepend to grid (adds to front)
+        grid.insertBefore(wrapper, grid.firstChild);
+      } else {
+        // If container exists, make sure it's visible
+        const wrapper = container.closest('.miniapp-wrapper');
+        if (wrapper) {
+          wrapper.style.display = 'block';
+        }
+        container.style.display = 'flex';
       }
 
       const instance = await this.appManager.mount(className, {
@@ -162,6 +243,16 @@ class App {
       await this.appManager.unmount(instance.id);
       delete this.miniAppInstances[className];
       this.updateButtonState(className, false);
+
+      // Remove the wrapper from DOM
+      const containerSelector = this.getContainerSelector(className);
+      const container = document.getElementById(containerSelector);
+      if (container) {
+        const wrapper = container.closest('.miniapp-wrapper');
+        if (wrapper) {
+          wrapper.remove();
+        }
+      }
 
       this.logger.info(`Unmounted ${className}`);
 
@@ -238,6 +329,24 @@ class App {
     eventBus.on('app:error', (error) => {
       this.showError(error.message || 'An error occurred');
     });
+
+    // Person management events
+    eventBus.on('person:login', (person) => {
+      this.currentUser = person;
+      this.updateAuthLink();
+      this.logger.info('User logged in:', person.username);
+    });
+
+    eventBus.on('person:logout', () => {
+      this.currentUser = null;
+      this.updateAuthLink();
+      this.logger.info('User logged out');
+    });
+
+    // Auth focus event - close other apps when showing auth screens
+    eventBus.on('auth:focus', () => {
+      this.closeOtherApps();
+    });
   }
 
   /**
@@ -258,6 +367,64 @@ class App {
     const indicator = document.getElementById('sync-status');
     if (indicator) {
       indicator.textContent = status;
+    }
+  }
+
+  /**
+   * Handle auth link click
+   */
+  async handleAuthClick() {
+    // Mount PersonManagementApp if not already mounted
+    if (!this.miniAppInstances['PersonManagementApp']) {
+      await this.mountMiniApp('PersonManagementApp', 'person-container');
+    }
+
+    // Make container visible
+    const container = document.getElementById('person-container');
+    if (container) {
+      container.style.display = 'block';
+    }
+
+    const personApp = this.miniAppInstances['PersonManagementApp'];
+    if (!personApp) return;
+
+    if (this.currentUser) {
+      // Show profile view for current user
+      personApp.showProfileView();
+    } else {
+      // Show login view
+      personApp.showLoginView();
+    }
+  }
+
+  /**
+   * Close all apps except PersonManagementApp
+   */
+  async closeOtherApps() {
+    const appsToClose = Object.keys(this.miniAppInstances).filter(
+      name => name !== 'PersonManagementApp'
+    );
+
+    for (const appName of appsToClose) {
+      await this.unmountMiniApp(appName);
+    }
+
+    this.logger.info('Closed other apps for auth focus');
+  }
+
+  /**
+   * Update auth link text and appearance
+   */
+  updateAuthLink() {
+    const authLink = document.getElementById('auth-link');
+    if (authLink) {
+      if (this.currentUser) {
+        authLink.textContent = 'My';
+        authLink.classList.add('logged-in');
+      } else {
+        authLink.textContent = 'Login';
+        authLink.classList.remove('logged-in');
+      }
     }
   }
 

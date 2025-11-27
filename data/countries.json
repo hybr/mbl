@@ -1,0 +1,66 @@
+[
+  {
+    "code": "US",
+    "name": "United States",
+    "continent": "North America",
+    "population": 331900000,
+    "capital": "Washington D.C.",
+    "currency": "USD"
+  },
+  {
+    "code": "GB",
+    "name": "United Kingdom",
+    "continent": "Europe",
+    "population": 67220000,
+    "capital": "London",
+    "currency": "GBP"
+  },
+  {
+    "code": "JP",
+    "name": "Japan",
+    "continent": "Asia",
+    "population": 125800000,
+    "capital": "Tokyo",
+    "currency": "JPY"
+  },
+  {
+    "code": "DE",
+    "name": "Germany",
+    "continent": "Europe",
+    "population": 83200000,
+    "capital": "Berlin",
+    "currency": "EUR"
+  },
+  {
+    "code": "IN",
+    "name": "India",
+    "continent": "Asia",
+    "population": 1393000000,
+    "capital": "New Delhi",
+    "currency": "INR"
+  },
+  {
+    "code": "BR",
+    "name": "Brazil",
+    "continent": "South America",
+    "population": 213900000,
+    "capital": "Brasília",
+    "currency": "BRL"
+  },
+  {
+    "code": "AU",
+    "name": "Australia",
+    "continent": "Oceania",
+    "population": 25690000,
+    "capital": "Canberra",
+    "currency": "AUD"
+  },
+  {
+    "code": "CA",
+    "name": "Canada",
+    "continent": "North America",
+    "population": 38010000,
+    "capital": "Ottawa",
+    "currency": "CAD"
+  }
+]

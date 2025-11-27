@@ -1,0 +1,37 @@
+[
+  {
+    "role_id": "admin",
+    "role_name": "Administrator",
+    "permissions": ["read", "write", "delete", "manage_users"],
+    "level": 1,
+    "is_active": true
+  },
+  {
+    "role_id": "manager",
+    "role_name": "Manager",
+    "permissions": ["read", "write", "approve"],
+    "level": 2,
+    "is_active": true
+  },
+  {
+    "role_id": "editor",
+    "role_name": "Editor",
+    "permissions": ["read", "write"],
+    "level": 3,
+    "is_active": true
+  },
+  {
+    "role_id": "viewer",
+    "role_name": "Viewer",
+    "permissions": ["read"],
+    "level": 4,
+    "is_active": true
+  },
+  {
+    "role_id": "guest",
+    "role_name": "Guest",
+    "permissions": ["read"],
+    "level": 5,
+    "is_active": false
+  }
+]

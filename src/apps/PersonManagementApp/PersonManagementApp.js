@@ -3,10 +3,10 @@
  * Handles person profiles, credentials, relations, and authentication
  */
 
-import { MiniApp } from '../core/MiniApp.js';
-import { Button } from '../components/Button.js';
-import { Input } from '../components/Input.js';
-import { Notification } from '../utils/Notification.js';
+import { MiniApp } from '../../core/MiniApp.js';
+import { Button } from '../../components/Button.js';
+import { Input } from '../../components/Input.js';
+import { Notification } from '../../utils/Notification.js';
 
 class PersonManagementApp extends MiniApp {
   constructor(options = {}) {
@@ -17,9 +17,10 @@ class PersonManagementApp extends MiniApp {
 
     this.persons = [];
     this.currentPerson = null;
-    this.currentView = 'list'; // 'list', 'edit', 'login'
+    this.currentView = 'list'; // 'list', 'edit', 'login', 'signup', 'forgot-password', 'profile'
     this.currentUser = null; // Logged in user
     this.components = {};
+    this.resetEmail = '';
   }
 
   /**
@@ -38,6 +39,66 @@ class PersonManagementApp extends MiniApp {
 
     // Load all persons
     await this.loadPersons();
+
+    // Restore session if exists
+    await this.restoreSession();
+  }
+
+  /**
+   * Save current user session to localStorage
+   */
+  saveSession() {
+    if (this.currentUser) {
+      const sessionData = {
+        userId: this.currentUser._id,
+        username: this.currentUser.username,
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem('personManagementApp_session', JSON.stringify(sessionData));
+      this.logger.info('Session saved for user:', this.currentUser.username);
+    }
+  }
+
+  /**
+   * Restore user session from localStorage
+   */
+  async restoreSession() {
+    try {
+      const sessionData = localStorage.getItem('personManagementApp_session');
+
+      if (sessionData) {
+        const session = JSON.parse(sessionData);
+        this.logger.info('Found session for user:', session.username);
+
+        // Load the user from database
+        const user = await this.loadPerson(session.userId);
+
+        if (user) {
+          this.currentUser = user;
+          this.logger.info('Session restored for user:', user.username);
+
+          // Emit login event to update UI (this will update the auth link)
+          this.emit('person:login', user);
+
+          // Don't render - let user manually navigate to profile if needed
+        } else {
+          // User not found, clear invalid session
+          this.clearSession();
+          this.logger.warn('User not found, session cleared');
+        }
+      }
+    } catch (error) {
+      this.logger.error('Failed to restore session:', error);
+      this.clearSession();
+    }
+  }
+
+  /**
+   * Clear user session from localStorage
+   */
+  clearSession() {
+    localStorage.removeItem('personManagementApp_session');
+    this.logger.info('Session cleared');
   }
 
   /**
@@ -73,6 +134,15 @@ class PersonManagementApp extends MiniApp {
         break;
       case 'login':
         this.renderLoginView();
+        break;
+      case 'signup':
+        this.renderSignupView();
+        break;
+      case 'forgot-password':
+        this.renderForgotPasswordView();
+        break;
+      case 'profile':
+        this.renderProfileView();
         break;
     }
   }
@@ -312,20 +382,27 @@ class PersonManagementApp extends MiniApp {
    * Render login view
    */
   renderLoginView() {
-    // Header
-    const header = this.createElement('div', { className: 'miniapp-header' });
-    const title = this.createElement('h2', {}, ['Login']);
-    const backBtn = this.createElement('button', {
-      className: 'btn btn-small',
-      onClick: () => this.showListView()
-    }, ['← Back']);
+    // Emit event to close other apps
+    this.emit('auth:focus');
 
-    header.appendChild(backBtn);
+    // Add auth-focused class to container
+    this.container.classList.add('auth-view');
+
+    // Login card wrapper
+    const authWrapper = this.createElement('div', { className: 'auth-wrapper' });
+    const authCard = this.createElement('div', { className: 'auth-card' });
+
+    // Header
+    const header = this.createElement('div', { className: 'auth-header' });
+    const title = this.createElement('h2', { className: 'auth-title' }, ['Welcome Back']);
+    const subtitle = this.createElement('p', { className: 'auth-subtitle' }, ['Sign in to your account']);
+
     header.appendChild(title);
+    header.appendChild(subtitle);
 
     // Login form
     const form = this.createElement('form', {
-      className: 'login-form',
+      className: 'auth-form',
       onsubmit: (e) => {
         e.preventDefault();
         this.performLogin();
@@ -333,48 +410,360 @@ class PersonManagementApp extends MiniApp {
     });
 
     const usernameGroup = this.createElement('div', { className: 'form-group' });
-    const usernameLabel = this.createElement('label', {}, ['Username']);
+    const usernameLabel = this.createElement('label', { className: 'form-label' }, ['Username']);
     this.components.loginUsername = new Input({
-      placeholder: 'Enter username',
-      className: 'input',
+      placeholder: 'Enter your username',
+      className: 'input input-auth',
       type: 'text'
     });
     usernameGroup.appendChild(usernameLabel);
     usernameGroup.appendChild(this.components.loginUsername.create());
 
     const passwordGroup = this.createElement('div', { className: 'form-group' });
-    const passwordLabel = this.createElement('label', {}, ['Password']);
+    const passwordLabel = this.createElement('label', { className: 'form-label' }, ['Password']);
     this.components.loginPassword = new Input({
-      placeholder: 'Enter password',
-      className: 'input',
+      placeholder: 'Enter your password',
+      className: 'input input-auth',
       type: 'password'
     });
     passwordGroup.appendChild(passwordLabel);
     passwordGroup.appendChild(this.components.loginPassword.create());
 
-    const otpGroup = this.createElement('div', { className: 'form-group' });
-    const otpLabel = this.createElement('label', {}, ['OTP (if enabled)']);
-    this.components.loginOtp = new Input({
-      placeholder: 'Enter OTP',
-      className: 'input',
-      type: 'text'
-    });
-    otpGroup.appendChild(otpLabel);
-    otpGroup.appendChild(this.components.loginOtp.create());
+    // Forgot password link
+    const forgotLink = this.createElement('div', { className: 'auth-link-container' });
+    const forgotBtn = this.createElement('a', {
+      href: '#',
+      className: 'auth-link-text',
+      onclick: (e) => {
+        e.preventDefault();
+        this.showForgotPasswordView();
+      }
+    }, ['Forgot password?']);
+    forgotLink.appendChild(forgotBtn);
 
     const loginBtn = this.createElement('button', {
-      className: 'btn btn-primary btn-block',
+      className: 'btn btn-primary btn-block btn-auth',
       type: 'submit'
-    }, ['Login']);
+    }, ['Sign In']);
 
     form.appendChild(usernameGroup);
     form.appendChild(passwordGroup);
-    form.appendChild(otpGroup);
+    form.appendChild(forgotLink);
     form.appendChild(loginBtn);
 
+    // Sign up link
+    const signupSection = this.createElement('div', { className: 'auth-footer' });
+    const signupText = this.createElement('span', { className: 'auth-footer-text' }, ["Don't have an account? "]);
+    const signupLink = this.createElement('a', {
+      href: '#',
+      className: 'auth-link-primary',
+      onclick: (e) => {
+        e.preventDefault();
+        this.showSignupView();
+      }
+    }, ['Sign Up']);
+    signupSection.appendChild(signupText);
+    signupSection.appendChild(signupLink);
+
     // Assemble
+    authCard.appendChild(header);
+    authCard.appendChild(form);
+    authCard.appendChild(signupSection);
+    authWrapper.appendChild(authCard);
+    this.container.appendChild(authWrapper);
+  }
+
+  /**
+   * Render signup view
+   */
+  renderSignupView() {
+    // Emit event to close other apps
+    this.emit('auth:focus');
+
+    // Add auth-focused class to container
+    this.container.classList.add('auth-view');
+
+    // Signup card wrapper
+    const authWrapper = this.createElement('div', { className: 'auth-wrapper' });
+    const authCard = this.createElement('div', { className: 'auth-card' });
+
+    // Header
+    const header = this.createElement('div', { className: 'auth-header' });
+    const title = this.createElement('h2', { className: 'auth-title' }, ['Create Account']);
+    const subtitle = this.createElement('p', { className: 'auth-subtitle' }, ['Sign up to get started']);
+
+    header.appendChild(title);
+    header.appendChild(subtitle);
+
+    // Signup form
+    const form = this.createElement('form', {
+      className: 'auth-form',
+      onsubmit: (e) => {
+        e.preventDefault();
+        this.performSignup();
+      }
+    });
+
+    const firstNameGroup = this.createElement('div', { className: 'form-group' });
+    const firstNameLabel = this.createElement('label', { className: 'form-label' }, ['First Name']);
+    this.components.signupFirstName = new Input({
+      placeholder: 'Enter your first name',
+      className: 'input input-auth',
+      type: 'text'
+    });
+    firstNameGroup.appendChild(firstNameLabel);
+    firstNameGroup.appendChild(this.components.signupFirstName.create());
+
+    const lastNameGroup = this.createElement('div', { className: 'form-group' });
+    const lastNameLabel = this.createElement('label', { className: 'form-label' }, ['Last Name']);
+    this.components.signupLastName = new Input({
+      placeholder: 'Enter your last name',
+      className: 'input input-auth',
+      type: 'text'
+    });
+    lastNameGroup.appendChild(lastNameLabel);
+    lastNameGroup.appendChild(this.components.signupLastName.create());
+
+    const emailGroup = this.createElement('div', { className: 'form-group' });
+    const emailLabel = this.createElement('label', { className: 'form-label' }, ['Email']);
+    this.components.signupEmail = new Input({
+      placeholder: 'Enter your email',
+      className: 'input input-auth',
+      type: 'email'
+    });
+    emailGroup.appendChild(emailLabel);
+    emailGroup.appendChild(this.components.signupEmail.create());
+
+    const usernameGroup = this.createElement('div', { className: 'form-group' });
+    const usernameLabel = this.createElement('label', { className: 'form-label' }, ['Username']);
+    this.components.signupUsername = new Input({
+      placeholder: 'Choose a username',
+      className: 'input input-auth',
+      type: 'text'
+    });
+    usernameGroup.appendChild(usernameLabel);
+    usernameGroup.appendChild(this.components.signupUsername.create());
+
+    const passwordGroup = this.createElement('div', { className: 'form-group' });
+    const passwordLabel = this.createElement('label', { className: 'form-label' }, ['Password']);
+    this.components.signupPassword = new Input({
+      placeholder: 'Create a password',
+      className: 'input input-auth',
+      type: 'password'
+    });
+    passwordGroup.appendChild(passwordLabel);
+    passwordGroup.appendChild(this.components.signupPassword.create());
+
+    const confirmPasswordGroup = this.createElement('div', { className: 'form-group' });
+    const confirmPasswordLabel = this.createElement('label', { className: 'form-label' }, ['Confirm Password']);
+    this.components.signupConfirmPassword = new Input({
+      placeholder: 'Confirm your password',
+      className: 'input input-auth',
+      type: 'password'
+    });
+    confirmPasswordGroup.appendChild(confirmPasswordLabel);
+    confirmPasswordGroup.appendChild(this.components.signupConfirmPassword.create());
+
+    const signupBtn = this.createElement('button', {
+      className: 'btn btn-primary btn-block btn-auth',
+      type: 'submit'
+    }, ['Create Account']);
+
+    form.appendChild(firstNameGroup);
+    form.appendChild(lastNameGroup);
+    form.appendChild(emailGroup);
+    form.appendChild(usernameGroup);
+    form.appendChild(passwordGroup);
+    form.appendChild(confirmPasswordGroup);
+    form.appendChild(signupBtn);
+
+    // Login link
+    const loginSection = this.createElement('div', { className: 'auth-footer' });
+    const loginText = this.createElement('span', { className: 'auth-footer-text' }, ['Already have an account? ']);
+    const loginLink = this.createElement('a', {
+      href: '#',
+      className: 'auth-link-primary',
+      onclick: (e) => {
+        e.preventDefault();
+        this.showLoginView();
+      }
+    }, ['Sign In']);
+    loginSection.appendChild(loginText);
+    loginSection.appendChild(loginLink);
+
+    // Assemble
+    authCard.appendChild(header);
+    authCard.appendChild(form);
+    authCard.appendChild(loginSection);
+    authWrapper.appendChild(authCard);
+    this.container.appendChild(authWrapper);
+  }
+
+  /**
+   * Render forgot password view
+   */
+  renderForgotPasswordView() {
+    // Emit event to close other apps
+    this.emit('auth:focus');
+
+    // Add auth-focused class to container
+    this.container.classList.add('auth-view');
+
+    // Forgot password card wrapper
+    const authWrapper = this.createElement('div', { className: 'auth-wrapper' });
+    const authCard = this.createElement('div', { className: 'auth-card' });
+
+    // Header
+    const header = this.createElement('div', { className: 'auth-header' });
+    const title = this.createElement('h2', { className: 'auth-title' }, ['Forgot Password']);
+    const subtitle = this.createElement('p', { className: 'auth-subtitle' }, ['Enter your email to reset your password']);
+
+    header.appendChild(title);
+    header.appendChild(subtitle);
+
+    // Form
+    const form = this.createElement('form', {
+      className: 'auth-form',
+      onsubmit: (e) => {
+        e.preventDefault();
+        this.performPasswordReset();
+      }
+    });
+
+    const emailGroup = this.createElement('div', { className: 'form-group' });
+    const emailLabel = this.createElement('label', { className: 'form-label' }, ['Email']);
+    this.components.resetEmail = new Input({
+      placeholder: 'Enter your email',
+      className: 'input input-auth',
+      type: 'email'
+    });
+    emailGroup.appendChild(emailLabel);
+    emailGroup.appendChild(this.components.resetEmail.create());
+
+    const resetBtn = this.createElement('button', {
+      className: 'btn btn-primary btn-block btn-auth',
+      type: 'submit'
+    }, ['Send Reset Link']);
+
+    form.appendChild(emailGroup);
+    form.appendChild(resetBtn);
+
+    // Back to login link
+    const loginSection = this.createElement('div', { className: 'auth-footer' });
+    const loginLink = this.createElement('a', {
+      href: '#',
+      className: 'auth-link-primary',
+      onclick: (e) => {
+        e.preventDefault();
+        this.showLoginView();
+      }
+    }, ['← Back to Sign In']);
+    loginSection.appendChild(loginLink);
+
+    // Assemble
+    authCard.appendChild(header);
+    authCard.appendChild(form);
+    authCard.appendChild(loginSection);
+    authWrapper.appendChild(authCard);
+    this.container.appendChild(authWrapper);
+  }
+
+  /**
+   * Render profile view
+   */
+  renderProfileView() {
+    if (!this.currentUser) {
+      this.showLoginView();
+      return;
+    }
+
+    this.container.classList.remove('auth-view');
+
+    // Header
+    const header = this.createElement('div', { className: 'profile-header' });
+    const backBtn = this.createElement('button', {
+      className: 'btn btn-small',
+      onClick: () => this.showListView()
+    }, ['← Back']);
+    header.appendChild(backBtn);
+
+    // Profile card
+    const profileCard = this.createElement('div', { className: 'profile-card' });
+
+    // Avatar section
+    const avatarSection = this.createElement('div', { className: 'profile-avatar-section' });
+    const avatar = this.createElement('div', { className: 'profile-avatar' }, [
+      this.currentUser.firstName.charAt(0).toUpperCase() + (this.currentUser.lastName ? this.currentUser.lastName.charAt(0).toUpperCase() : '')
+    ]);
+    const name = this.createElement('h2', { className: 'profile-name' }, [this.getFullName(this.currentUser)]);
+    const username = this.createElement('p', { className: 'profile-username' }, [`@${this.currentUser.username}`]);
+
+    avatarSection.appendChild(avatar);
+    avatarSection.appendChild(name);
+    avatarSection.appendChild(username);
+
+    // Info section
+    const infoSection = this.createElement('div', { className: 'profile-info-section' });
+
+    if (this.currentUser.primaryEmail) {
+      const emailRow = this.createElement('div', { className: 'profile-info-row' });
+      const emailLabel = this.createElement('span', { className: 'profile-info-label' }, ['Email']);
+      const emailValue = this.createElement('span', { className: 'profile-info-value' }, [this.currentUser.primaryEmail]);
+      emailRow.appendChild(emailLabel);
+      emailRow.appendChild(emailValue);
+      infoSection.appendChild(emailRow);
+    }
+
+    if (this.currentUser.primaryPhone) {
+      const phoneRow = this.createElement('div', { className: 'profile-info-row' });
+      const phoneLabel = this.createElement('span', { className: 'profile-info-label' }, ['Phone']);
+      const phoneValue = this.createElement('span', { className: 'profile-info-value' }, [this.currentUser.primaryPhone]);
+      phoneRow.appendChild(phoneLabel);
+      phoneRow.appendChild(phoneValue);
+      infoSection.appendChild(phoneRow);
+    }
+
+    if (this.currentUser.dateOfBirth) {
+      const dobRow = this.createElement('div', { className: 'profile-info-row' });
+      const dobLabel = this.createElement('span', { className: 'profile-info-label' }, ['Age']);
+      const dobValue = this.createElement('span', { className: 'profile-info-value' }, [this.calculateAge(this.currentUser.dateOfBirth).toString()]);
+      dobRow.appendChild(dobLabel);
+      dobRow.appendChild(dobValue);
+      infoSection.appendChild(dobRow);
+    }
+
+    if (this.currentUser.gender) {
+      const genderRow = this.createElement('div', { className: 'profile-info-row' });
+      const genderLabel = this.createElement('span', { className: 'profile-info-label' }, ['Gender']);
+      const genderValue = this.createElement('span', { className: 'profile-info-value' }, [this.currentUser.gender === 'M' ? 'Male' : this.currentUser.gender === 'F' ? 'Female' : 'Other']);
+      genderRow.appendChild(genderLabel);
+      genderRow.appendChild(genderValue);
+      infoSection.appendChild(genderRow);
+    }
+
+    // Actions
+    const actions = this.createElement('div', { className: 'profile-actions' });
+
+    const editBtn = this.createElement('button', {
+      className: 'btn btn-primary',
+      onClick: () => this.showEditView(this.currentUser._id)
+    }, ['Edit Profile']);
+
+    const logoutBtn = this.createElement('button', {
+      className: 'btn btn-secondary',
+      onClick: () => this.logout()
+    }, ['Logout']);
+
+    actions.appendChild(editBtn);
+    actions.appendChild(logoutBtn);
+
+    // Assemble
+    profileCard.appendChild(avatarSection);
+    profileCard.appendChild(infoSection);
+    profileCard.appendChild(actions);
+
     this.container.appendChild(header);
-    this.container.appendChild(form);
+    this.container.appendChild(profileCard);
   }
 
   /**
@@ -447,11 +836,15 @@ class PersonManagementApp extends MiniApp {
     const emptyOption = this.createElement('option', { value: '' }, ['-- None --']);
     select.appendChild(emptyOption);
 
-    // Add all persons
+    // Add all persons with full name and username
     this.persons.forEach(person => {
+      const fullName = this.getFullName(person);
+      const username = person.username || 'no-username';
+      const displayText = `${fullName} (@${username})`;
+
       const option = this.createElement('option', {
         value: person._id
-      }, [this.getFullName(person)]);
+      }, [displayText]);
       select.appendChild(option);
     });
 
@@ -735,26 +1128,165 @@ class PersonManagementApp extends MiniApp {
   async performLogin() {
     const username = this.components.loginUsername.getValue().trim();
     const password = this.components.loginPassword.getValue().trim();
-    const otp = this.components.loginOtp.getValue().trim();
 
     if (!username || !password) {
       Notification.error('Username and password are required');
       return;
     }
 
-    const result = await this.authenticate(username, password, otp || null);
+    const result = await this.authenticate(username, password, null);
 
     if (result.success) {
       this.currentUser = result.person;
       Notification.success(`Welcome, ${this.getFullName(result.person)}!`);
 
+      // Save session to localStorage
+      this.saveSession();
+
       // Emit login event
       this.emit('person:login', result.person);
 
-      // Go to list view
-      this.showListView();
+      // Show profile view
+      this.showProfileView();
     } else {
       Notification.error(result.error);
+    }
+  }
+
+  /**
+   * Perform signup
+   */
+  async performSignup() {
+    const firstName = this.components.signupFirstName.getValue().trim();
+    const lastName = this.components.signupLastName.getValue().trim();
+    const email = this.components.signupEmail.getValue().trim();
+    const username = this.components.signupUsername.getValue().trim();
+    const password = this.components.signupPassword.getValue().trim();
+    const confirmPassword = this.components.signupConfirmPassword.getValue().trim();
+
+    // Validation
+    if (!firstName) {
+      Notification.error('First name is required');
+      return;
+    }
+
+    if (!email) {
+      Notification.error('Email is required');
+      return;
+    }
+
+    if (!this.isValidEmail(email)) {
+      Notification.error('Invalid email format');
+      return;
+    }
+
+    if (!username) {
+      Notification.error('Username is required');
+      return;
+    }
+
+    if (!password) {
+      Notification.error('Password is required');
+      return;
+    }
+
+    if (password.length < 6) {
+      Notification.error('Password must be at least 6 characters');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Notification.error('Passwords do not match');
+      return;
+    }
+
+    // Check if username exists
+    const existingPerson = await this.findPersonByUsername(username);
+    if (existingPerson) {
+      Notification.error('Username already exists');
+      return;
+    }
+
+    try {
+      // Create new person
+      const person = {
+        _id: `person:${this.generateUUID()}`,
+        type: 'person',
+        namePrefix: '',
+        firstName: firstName,
+        middleName: '',
+        lastName: lastName,
+        nameSuffix: '',
+        dateOfBirth: '',
+        gender: '',
+        primaryPhone: '',
+        primaryEmail: email,
+        fatherId: null,
+        motherId: null,
+        username: username,
+        hashedPassword: this.hashPassword(password),
+        otp: '',
+        failedLoginAttempts: 0,
+        lastLoginTimestamp: null,
+        passwordUpdatedTimestamp: new Date().toISOString()
+      };
+
+      await this.db.create(person);
+      Notification.success('Account created successfully! Please log in.');
+
+      // Clear form and go to login
+      this.showLoginView();
+
+    } catch (error) {
+      this.logger.error('Signup failed:', error);
+      Notification.error('Failed to create account. Please try again.');
+    }
+  }
+
+  /**
+   * Perform password reset
+   */
+  async performPasswordReset() {
+    const email = this.components.resetEmail.getValue().trim();
+
+    if (!email) {
+      Notification.error('Email is required');
+      return;
+    }
+
+    if (!this.isValidEmail(email)) {
+      Notification.error('Invalid email format');
+      return;
+    }
+
+    try {
+      // Find person by email
+      const results = await this.db.query({
+        selector: {
+          type: 'person',
+          primaryEmail: email
+        },
+        limit: 1
+      });
+
+      if (results.length === 0) {
+        // For security, don't reveal if email exists
+        Notification.success('If an account with that email exists, a password reset link has been sent.');
+        setTimeout(() => this.showLoginView(), 2000);
+        return;
+      }
+
+      // In a real app, you would send an email here
+      // For demo purposes, we'll just show a success message
+      Notification.success('Password reset link sent to your email!');
+
+      this.logger.info('Password reset requested for:', email);
+
+      setTimeout(() => this.showLoginView(), 2000);
+
+    } catch (error) {
+      this.logger.error('Password reset failed:', error);
+      Notification.error('Failed to process request. Please try again.');
     }
   }
 
@@ -762,6 +1294,9 @@ class PersonManagementApp extends MiniApp {
    * Logout
    */
   logout() {
+    // Clear session from localStorage
+    this.clearSession();
+
     this.currentUser = null;
     Notification.info('Logged out successfully');
     this.emit('person:logout');
@@ -819,6 +1354,34 @@ class PersonManagementApp extends MiniApp {
    */
   showLoginView() {
     this.currentView = 'login';
+    this.render();
+  }
+
+  /**
+   * Show signup view
+   */
+  showSignupView() {
+    this.currentView = 'signup';
+    this.render();
+  }
+
+  /**
+   * Show forgot password view
+   */
+  showForgotPasswordView() {
+    this.currentView = 'forgot-password';
+    this.render();
+  }
+
+  /**
+   * Show profile view
+   */
+  showProfileView() {
+    if (!this.currentUser) {
+      this.showLoginView();
+      return;
+    }
+    this.currentView = 'profile';
     this.render();
   }
 

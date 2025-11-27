@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "level": "Critical",
+    "color": "#ef4444",
+    "icon": "⚠️",
+    "description": "Immediate attention required",
+    "sla_hours": 1
+  },
+  {
+    "id": 2,
+    "level": "High",
+    "color": "#f59e0b",
+    "icon": "🔴",
+    "description": "Important, needs quick resolution",
+    "sla_hours": 4
+  },
+  {
+    "id": 3,
+    "level": "Medium",
+    "color": "#3b82f6",
+    "icon": "🟡",
+    "description": "Normal priority",
+    "sla_hours": 24
+  },
+  {
+    "id": 4,
+    "level": "Low",
+    "color": "#10b981",
+    "icon": "🟢",
+    "description": "Can be addressed later",
+    "sla_hours": 72
+  }
+]

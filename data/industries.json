@@ -1,0 +1,1002 @@
+[
+  {
+    "id": 1,
+    "code": "TECH-SW",
+    "name": "Software & SaaS",
+    "category": "Technology",
+    "subcategory": "Software Development",
+    "description": "Software development, SaaS platforms, enterprise software",
+    "icon": "💻",
+    "growth_rate": "High"
+  },
+  {
+    "id": 2,
+    "code": "TECH-HW",
+    "name": "Computer Hardware & Electronics",
+    "category": "Technology",
+    "subcategory": "Hardware",
+    "description": "Computer manufacturing, semiconductors, electronic components",
+    "icon": "🖥️",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 3,
+    "code": "TECH-AI",
+    "name": "Artificial Intelligence & Machine Learning",
+    "category": "Technology",
+    "subcategory": "AI/ML",
+    "description": "AI platforms, machine learning, deep learning, NLP",
+    "icon": "🤖",
+    "growth_rate": "Very High"
+  },
+  {
+    "id": 4,
+    "code": "TECH-CYBER",
+    "name": "Cybersecurity",
+    "category": "Technology",
+    "subcategory": "Security",
+    "description": "Network security, data protection, threat detection",
+    "icon": "🔒",
+    "growth_rate": "High"
+  },
+  {
+    "id": 5,
+    "code": "TECH-CLOUD",
+    "name": "Cloud Computing & Infrastructure",
+    "category": "Technology",
+    "subcategory": "Cloud Services",
+    "description": "Cloud platforms, hosting, infrastructure as a service",
+    "icon": "☁️",
+    "growth_rate": "High"
+  },
+  {
+    "id": 6,
+    "code": "TECH-GAME",
+    "name": "Gaming & Entertainment Software",
+    "category": "Technology",
+    "subcategory": "Gaming",
+    "description": "Video games, mobile games, esports platforms",
+    "icon": "🎮",
+    "growth_rate": "High"
+  },
+  {
+    "id": 7,
+    "code": "FIN-BANK",
+    "name": "Banking",
+    "category": "Finance",
+    "subcategory": "Traditional Banking",
+    "description": "Commercial banks, retail banking, investment banking",
+    "icon": "🏦",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 8,
+    "code": "FIN-FINTECH",
+    "name": "FinTech & Digital Payments",
+    "category": "Finance",
+    "subcategory": "Financial Technology",
+    "description": "Digital payments, mobile banking, cryptocurrency, blockchain",
+    "icon": "💳",
+    "growth_rate": "Very High"
+  },
+  {
+    "id": 9,
+    "code": "FIN-INS",
+    "name": "Insurance",
+    "category": "Finance",
+    "subcategory": "Insurance Services",
+    "description": "Life insurance, health insurance, property insurance",
+    "icon": "🛡️",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 10,
+    "code": "FIN-INV",
+    "name": "Investment & Asset Management",
+    "category": "Finance",
+    "subcategory": "Investment",
+    "description": "Wealth management, mutual funds, private equity, hedge funds",
+    "icon": "📈",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 11,
+    "code": "FIN-RE",
+    "name": "Real Estate & PropTech",
+    "category": "Finance",
+    "subcategory": "Real Estate",
+    "description": "Property development, real estate tech, REITs",
+    "icon": "🏢",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 12,
+    "code": "HEALTH-PHARM",
+    "name": "Pharmaceuticals",
+    "category": "Healthcare",
+    "subcategory": "Pharmaceuticals",
+    "description": "Drug development, pharmaceutical manufacturing",
+    "icon": "💊",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 13,
+    "code": "HEALTH-BIOTECH",
+    "name": "Biotechnology",
+    "category": "Healthcare",
+    "subcategory": "Biotech",
+    "description": "Genetic engineering, biomedical research, gene therapy",
+    "icon": "🧬",
+    "growth_rate": "High"
+  },
+  {
+    "id": 14,
+    "code": "HEALTH-MED",
+    "name": "Medical Devices & Equipment",
+    "category": "Healthcare",
+    "subcategory": "Medical Technology",
+    "description": "Medical equipment, diagnostic devices, surgical instruments",
+    "icon": "🩺",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 15,
+    "code": "HEALTH-HOSP",
+    "name": "Hospitals & Healthcare Services",
+    "category": "Healthcare",
+    "subcategory": "Healthcare Services",
+    "description": "Hospitals, clinics, healthcare facilities, telemedicine",
+    "icon": "🏥",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 16,
+    "code": "HEALTH-DIGITAL",
+    "name": "Digital Health & HealthTech",
+    "category": "Healthcare",
+    "subcategory": "Health Technology",
+    "description": "Health apps, wearables, telemedicine platforms, AI diagnostics",
+    "icon": "📱",
+    "growth_rate": "Very High"
+  },
+  {
+    "id": 17,
+    "code": "RETAIL-ECOM",
+    "name": "E-commerce & Online Retail",
+    "category": "Retail",
+    "subcategory": "Digital Retail",
+    "description": "Online marketplaces, e-commerce platforms, direct-to-consumer",
+    "icon": "🛒",
+    "growth_rate": "High"
+  },
+  {
+    "id": 18,
+    "code": "RETAIL-STORE",
+    "name": "Brick & Mortar Retail",
+    "category": "Retail",
+    "subcategory": "Physical Retail",
+    "description": "Department stores, specialty retail, supermarkets",
+    "icon": "🏬",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 19,
+    "code": "RETAIL-FASHION",
+    "name": "Fashion & Apparel",
+    "category": "Retail",
+    "subcategory": "Fashion",
+    "description": "Clothing, footwear, accessories, luxury fashion",
+    "icon": "👗",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 20,
+    "code": "RETAIL-FOOD",
+    "name": "Food & Beverage Retail",
+    "category": "Retail",
+    "subcategory": "Food Retail",
+    "description": "Grocery stores, convenience stores, specialty food retail",
+    "icon": "🍕",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 21,
+    "code": "MANU-AUTO",
+    "name": "Automotive Manufacturing",
+    "category": "Manufacturing",
+    "subcategory": "Automotive",
+    "description": "Car manufacturing, auto parts, electric vehicles",
+    "icon": "🚗",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 22,
+    "code": "MANU-AERO",
+    "name": "Aerospace & Defense",
+    "category": "Manufacturing",
+    "subcategory": "Aerospace",
+    "description": "Aircraft manufacturing, defense systems, space technology",
+    "icon": "✈️",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 23,
+    "code": "MANU-CHEM",
+    "name": "Chemicals & Plastics",
+    "category": "Manufacturing",
+    "subcategory": "Chemicals",
+    "description": "Chemical production, plastics, industrial materials",
+    "icon": "⚗️",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 24,
+    "code": "MANU-FOOD",
+    "name": "Food & Beverage Manufacturing",
+    "category": "Manufacturing",
+    "subcategory": "Food Production",
+    "description": "Food processing, beverage production, packaged goods",
+    "icon": "🏭",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 25,
+    "code": "MANU-TEXT",
+    "name": "Textiles & Apparel Manufacturing",
+    "category": "Manufacturing",
+    "subcategory": "Textiles",
+    "description": "Fabric production, clothing manufacturing, textile mills",
+    "icon": "🧵",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 26,
+    "code": "ENERGY-OIL",
+    "name": "Oil & Gas",
+    "category": "Energy",
+    "subcategory": "Fossil Fuels",
+    "description": "Oil extraction, gas production, petroleum refining",
+    "icon": "🛢️",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 27,
+    "code": "ENERGY-RENEW",
+    "name": "Renewable Energy",
+    "category": "Energy",
+    "subcategory": "Clean Energy",
+    "description": "Solar power, wind energy, hydroelectric, geothermal",
+    "icon": "♻️",
+    "growth_rate": "Very High"
+  },
+  {
+    "id": 28,
+    "code": "ENERGY-UTIL",
+    "name": "Utilities & Power Generation",
+    "category": "Energy",
+    "subcategory": "Utilities",
+    "description": "Electric utilities, water utilities, power plants",
+    "icon": "⚡",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 29,
+    "code": "TRANS-LOG",
+    "name": "Logistics & Supply Chain",
+    "category": "Transportation",
+    "subcategory": "Logistics",
+    "description": "Warehousing, freight forwarding, supply chain management",
+    "icon": "📦",
+    "growth_rate": "High"
+  },
+  {
+    "id": 30,
+    "code": "TRANS-AIR",
+    "name": "Airlines & Aviation",
+    "category": "Transportation",
+    "subcategory": "Aviation",
+    "description": "Passenger airlines, cargo airlines, airport services",
+    "icon": "🛫",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 31,
+    "code": "TRANS-SHIP",
+    "name": "Shipping & Maritime",
+    "category": "Transportation",
+    "subcategory": "Maritime",
+    "description": "Cargo shipping, cruise lines, port operations",
+    "icon": "🚢",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 32,
+    "code": "TRANS-RAIL",
+    "name": "Rail & Public Transit",
+    "category": "Transportation",
+    "subcategory": "Rail",
+    "description": "Railway systems, metro, public transportation",
+    "icon": "🚆",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 33,
+    "code": "TRANS-RIDE",
+    "name": "Ride-sharing & Mobility",
+    "category": "Transportation",
+    "subcategory": "Mobility Services",
+    "description": "Ride-hailing, bike sharing, scooter sharing, mobility platforms",
+    "icon": "🚕",
+    "growth_rate": "High"
+  },
+  {
+    "id": 34,
+    "code": "MEDIA-STREAM",
+    "name": "Streaming & Digital Media",
+    "category": "Media & Entertainment",
+    "subcategory": "Digital Media",
+    "description": "Video streaming, music streaming, podcasts, digital content",
+    "icon": "📺",
+    "growth_rate": "High"
+  },
+  {
+    "id": 35,
+    "code": "MEDIA-TRAD",
+    "name": "Traditional Media & Broadcasting",
+    "category": "Media & Entertainment",
+    "subcategory": "Broadcasting",
+    "description": "TV networks, radio, newspapers, magazines",
+    "icon": "📻",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 36,
+    "code": "MEDIA-SOCIAL",
+    "name": "Social Media & Networks",
+    "category": "Media & Entertainment",
+    "subcategory": "Social Media",
+    "description": "Social networking platforms, content sharing, community platforms",
+    "icon": "📱",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 37,
+    "code": "MEDIA-AD",
+    "name": "Advertising & Marketing",
+    "category": "Media & Entertainment",
+    "subcategory": "Marketing",
+    "description": "Digital advertising, marketing agencies, ad tech platforms",
+    "icon": "📢",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 38,
+    "code": "MEDIA-PUB",
+    "name": "Publishing & Books",
+    "category": "Media & Entertainment",
+    "subcategory": "Publishing",
+    "description": "Book publishing, e-books, digital publishing",
+    "icon": "📚",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 39,
+    "code": "EDU-HIGHER",
+    "name": "Higher Education",
+    "category": "Education",
+    "subcategory": "Universities",
+    "description": "Colleges, universities, graduate schools",
+    "icon": "🎓",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 40,
+    "code": "EDU-K12",
+    "name": "K-12 Education",
+    "category": "Education",
+    "subcategory": "Primary & Secondary",
+    "description": "Elementary schools, middle schools, high schools",
+    "icon": "🏫",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 41,
+    "code": "EDU-ONLINE",
+    "name": "EdTech & Online Learning",
+    "category": "Education",
+    "subcategory": "Educational Technology",
+    "description": "E-learning platforms, online courses, educational apps",
+    "icon": "💡",
+    "growth_rate": "Very High"
+  },
+  {
+    "id": 42,
+    "code": "EDU-TRAINING",
+    "name": "Professional Training & Development",
+    "category": "Education",
+    "subcategory": "Corporate Training",
+    "description": "Corporate training, skills development, certification programs",
+    "icon": "📊",
+    "growth_rate": "High"
+  },
+  {
+    "id": 43,
+    "code": "HOSP-HOTEL",
+    "name": "Hotels & Lodging",
+    "category": "Hospitality & Tourism",
+    "subcategory": "Accommodation",
+    "description": "Hotels, resorts, vacation rentals, hostels",
+    "icon": "🏨",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 44,
+    "code": "HOSP-REST",
+    "name": "Restaurants & Food Service",
+    "category": "Hospitality & Tourism",
+    "subcategory": "Food Service",
+    "description": "Restaurants, cafes, catering, food delivery",
+    "icon": "🍽️",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 45,
+    "code": "HOSP-TRAVEL",
+    "name": "Travel & Tourism",
+    "category": "Hospitality & Tourism",
+    "subcategory": "Travel Services",
+    "description": "Travel agencies, tour operators, travel booking platforms",
+    "icon": "✈️",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 46,
+    "code": "HOSP-EVENT",
+    "name": "Events & Entertainment Venues",
+    "category": "Hospitality & Tourism",
+    "subcategory": "Events",
+    "description": "Event planning, concert venues, convention centers",
+    "icon": "🎪",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 47,
+    "code": "CONST-RES",
+    "name": "Residential Construction",
+    "category": "Construction",
+    "subcategory": "Residential",
+    "description": "Home building, residential development, renovations",
+    "icon": "🏠",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 48,
+    "code": "CONST-COM",
+    "name": "Commercial Construction",
+    "category": "Construction",
+    "subcategory": "Commercial",
+    "description": "Office buildings, shopping centers, industrial facilities",
+    "icon": "🏗️",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 49,
+    "code": "CONST-INFRA",
+    "name": "Infrastructure & Civil Engineering",
+    "category": "Construction",
+    "subcategory": "Infrastructure",
+    "description": "Roads, bridges, tunnels, dams, public works",
+    "icon": "🌉",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 50,
+    "code": "AGRI-FARM",
+    "name": "Agriculture & Farming",
+    "category": "Agriculture",
+    "subcategory": "Farming",
+    "description": "Crop production, livestock, dairy farming",
+    "icon": "🌾",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 51,
+    "code": "AGRI-TECH",
+    "name": "AgriTech & Precision Farming",
+    "category": "Agriculture",
+    "subcategory": "Agricultural Technology",
+    "description": "Smart farming, drones, IoT sensors, agricultural automation",
+    "icon": "🚜",
+    "growth_rate": "High"
+  },
+  {
+    "id": 52,
+    "code": "AGRI-FISH",
+    "name": "Fishing & Aquaculture",
+    "category": "Agriculture",
+    "subcategory": "Fisheries",
+    "description": "Commercial fishing, fish farming, seafood processing",
+    "icon": "🎣",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 53,
+    "code": "TELECOM-CARRIER",
+    "name": "Telecommunications Carriers",
+    "category": "Telecommunications",
+    "subcategory": "Network Operators",
+    "description": "Mobile networks, internet service providers, telecom infrastructure",
+    "icon": "📡",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 54,
+    "code": "TELECOM-5G",
+    "name": "5G & Network Technology",
+    "category": "Telecommunications",
+    "subcategory": "Advanced Networks",
+    "description": "5G infrastructure, network equipment, wireless technology",
+    "icon": "📶",
+    "growth_rate": "High"
+  },
+  {
+    "id": 55,
+    "code": "LEGAL-SERVICES",
+    "name": "Legal Services",
+    "category": "Professional Services",
+    "subcategory": "Legal",
+    "description": "Law firms, legal consulting, litigation services",
+    "icon": "⚖️",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 56,
+    "code": "PROF-CONSULT",
+    "name": "Management Consulting",
+    "category": "Professional Services",
+    "subcategory": "Consulting",
+    "description": "Strategy consulting, business advisory, operations consulting",
+    "icon": "💼",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 57,
+    "code": "PROF-ACCOUNT",
+    "name": "Accounting & Auditing",
+    "category": "Professional Services",
+    "subcategory": "Financial Services",
+    "description": "Accounting firms, auditing, tax preparation, bookkeeping",
+    "icon": "📊",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 58,
+    "code": "PROF-HR",
+    "name": "Human Resources & Staffing",
+    "category": "Professional Services",
+    "subcategory": "HR Services",
+    "description": "Recruitment, staffing agencies, HR consulting",
+    "icon": "👥",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 59,
+    "code": "PROF-DESIGN",
+    "name": "Design & Creative Services",
+    "category": "Professional Services",
+    "subcategory": "Creative",
+    "description": "Graphic design, UX/UI design, branding, advertising creative",
+    "icon": "🎨",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 60,
+    "code": "GOV-FED",
+    "name": "Federal Government",
+    "category": "Government & Public Sector",
+    "subcategory": "Federal",
+    "description": "Federal agencies, national defense, federal programs",
+    "icon": "🏛️",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 61,
+    "code": "GOV-STATE",
+    "name": "State & Local Government",
+    "category": "Government & Public Sector",
+    "subcategory": "Regional Government",
+    "description": "State agencies, municipal services, local government",
+    "icon": "🏢",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 62,
+    "code": "GOV-PUBLIC",
+    "name": "Public Safety & Emergency Services",
+    "category": "Government & Public Sector",
+    "subcategory": "Public Safety",
+    "description": "Police, fire departments, emergency medical services",
+    "icon": "🚒",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 63,
+    "code": "NON-CHARITY",
+    "name": "Charities & Foundations",
+    "category": "Non-Profit",
+    "subcategory": "Charitable Organizations",
+    "description": "Charitable foundations, humanitarian organizations",
+    "icon": "❤️",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 64,
+    "code": "NON-SOCIAL",
+    "name": "Social Services & Advocacy",
+    "category": "Non-Profit",
+    "subcategory": "Social Services",
+    "description": "Community services, advocacy groups, social welfare",
+    "icon": "🤝",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 65,
+    "code": "NON-RESEARCH",
+    "name": "Research & Think Tanks",
+    "category": "Non-Profit",
+    "subcategory": "Research",
+    "description": "Research institutions, policy think tanks, academic research",
+    "icon": "🔬",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 66,
+    "code": "SPORT-PROF",
+    "name": "Professional Sports",
+    "category": "Sports & Recreation",
+    "subcategory": "Professional Sports",
+    "description": "Sports teams, leagues, professional athletics",
+    "icon": "⚽",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 67,
+    "code": "SPORT-FIT",
+    "name": "Fitness & Wellness",
+    "category": "Sports & Recreation",
+    "subcategory": "Fitness",
+    "description": "Gyms, fitness studios, wellness centers, personal training",
+    "icon": "💪",
+    "growth_rate": "High"
+  },
+  {
+    "id": 68,
+    "code": "SPORT-OUTDOOR",
+    "name": "Outdoor Recreation & Adventure",
+    "category": "Sports & Recreation",
+    "subcategory": "Recreation",
+    "description": "Outdoor equipment, adventure tourism, recreation facilities",
+    "icon": "🏔️",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 69,
+    "code": "ENV-WASTE",
+    "name": "Waste Management & Recycling",
+    "category": "Environmental Services",
+    "subcategory": "Waste Management",
+    "description": "Waste collection, recycling, waste-to-energy",
+    "icon": "♻️",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 70,
+    "code": "ENV-CONSULT",
+    "name": "Environmental Consulting & Services",
+    "category": "Environmental Services",
+    "subcategory": "Environmental Consulting",
+    "description": "Environmental impact assessment, sustainability consulting",
+    "icon": "🌍",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 71,
+    "code": "ENV-WATER",
+    "name": "Water & Wastewater Treatment",
+    "category": "Environmental Services",
+    "subcategory": "Water Management",
+    "description": "Water treatment, wastewater management, water utilities",
+    "icon": "💧",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 72,
+    "code": "MINING-COAL",
+    "name": "Mining & Minerals",
+    "category": "Mining & Extraction",
+    "subcategory": "Mining",
+    "description": "Coal mining, metal mining, mineral extraction",
+    "icon": "⛏️",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 73,
+    "code": "MINING-METAL",
+    "name": "Metals & Steel Production",
+    "category": "Mining & Extraction",
+    "subcategory": "Metals",
+    "description": "Steel manufacturing, aluminum production, metal processing",
+    "icon": "🔩",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 74,
+    "code": "LUXURY-GOODS",
+    "name": "Luxury Goods & Jewelry",
+    "category": "Retail",
+    "subcategory": "Luxury",
+    "description": "High-end fashion, jewelry, watches, luxury accessories",
+    "icon": "💎",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 75,
+    "code": "PET-CARE",
+    "name": "Pet Care & Veterinary Services",
+    "category": "Consumer Services",
+    "subcategory": "Pet Services",
+    "description": "Veterinary clinics, pet grooming, pet supplies, pet insurance",
+    "icon": "🐾",
+    "growth_rate": "High"
+  },
+  {
+    "id": 76,
+    "code": "BEAUTY-PERSONAL",
+    "name": "Beauty & Personal Care",
+    "category": "Consumer Services",
+    "subcategory": "Beauty",
+    "description": "Salons, spas, cosmetics, skincare, beauty products",
+    "icon": "💄",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 77,
+    "code": "FUNERAL-SERVICES",
+    "name": "Funeral & Cemetery Services",
+    "category": "Consumer Services",
+    "subcategory": "Death Care",
+    "description": "Funeral homes, cremation services, cemetery management",
+    "icon": "🕊️",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 78,
+    "code": "SPACE-TECH",
+    "name": "Space Technology & Exploration",
+    "category": "Technology",
+    "subcategory": "Space",
+    "description": "Satellite technology, space exploration, rocket manufacturing",
+    "icon": "🚀",
+    "growth_rate": "Very High"
+  },
+  {
+    "id": 79,
+    "code": "DRONE-TECH",
+    "name": "Drones & UAV Technology",
+    "category": "Technology",
+    "subcategory": "Drones",
+    "description": "Drone manufacturing, UAV services, aerial photography",
+    "icon": "🛸",
+    "growth_rate": "High"
+  },
+  {
+    "id": 80,
+    "code": "ROBOTICS",
+    "name": "Robotics & Automation",
+    "category": "Technology",
+    "subcategory": "Robotics",
+    "description": "Industrial robots, automation systems, robotic process automation",
+    "icon": "🤖",
+    "growth_rate": "Very High"
+  },
+  {
+    "id": 81,
+    "code": "IOT-SMART",
+    "name": "IoT & Smart Devices",
+    "category": "Technology",
+    "subcategory": "Internet of Things",
+    "description": "Smart home devices, IoT platforms, connected devices",
+    "icon": "📱",
+    "growth_rate": "Very High"
+  },
+  {
+    "id": 82,
+    "code": "VR-AR",
+    "name": "Virtual Reality & Augmented Reality",
+    "category": "Technology",
+    "subcategory": "Immersive Tech",
+    "description": "VR headsets, AR applications, metaverse platforms",
+    "icon": "🥽",
+    "growth_rate": "High"
+  },
+  {
+    "id": 83,
+    "code": "QUANTUM-COMP",
+    "name": "Quantum Computing",
+    "category": "Technology",
+    "subcategory": "Advanced Computing",
+    "description": "Quantum computers, quantum algorithms, quantum research",
+    "icon": "⚛️",
+    "growth_rate": "Very High"
+  },
+  {
+    "id": 84,
+    "code": "CANNABIS",
+    "name": "Cannabis & Hemp Products",
+    "category": "Agriculture",
+    "subcategory": "Cannabis",
+    "description": "Cannabis cultivation, CBD products, dispensaries",
+    "icon": "🌿",
+    "growth_rate": "Very High"
+  },
+  {
+    "id": 85,
+    "code": "MUSIC-PROD",
+    "name": "Music Production & Recording",
+    "category": "Media & Entertainment",
+    "subcategory": "Music",
+    "description": "Recording studios, music labels, music production",
+    "icon": "🎵",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 86,
+    "code": "FILM-PROD",
+    "name": "Film & Video Production",
+    "category": "Media & Entertainment",
+    "subcategory": "Film",
+    "description": "Movie studios, video production, post-production",
+    "icon": "🎬",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 87,
+    "code": "PHOTO-SERVICES",
+    "name": "Photography Services",
+    "category": "Professional Services",
+    "subcategory": "Photography",
+    "description": "Commercial photography, portrait studios, photo editing",
+    "icon": "📷",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 88,
+    "code": "PRINTING-PUB",
+    "name": "Printing & Publishing Services",
+    "category": "Manufacturing",
+    "subcategory": "Printing",
+    "description": "Commercial printing, packaging printing, print-on-demand",
+    "icon": "🖨️",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 89,
+    "code": "PACKAGING",
+    "name": "Packaging & Containers",
+    "category": "Manufacturing",
+    "subcategory": "Packaging",
+    "description": "Packaging materials, container manufacturing, sustainable packaging",
+    "icon": "📦",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 90,
+    "code": "SECURITY-SERVICES",
+    "name": "Security Services & Equipment",
+    "category": "Professional Services",
+    "subcategory": "Physical Security",
+    "description": "Security guards, surveillance systems, alarm systems",
+    "icon": "🔐",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 91,
+    "code": "CLEANING-SERVICES",
+    "name": "Cleaning & Facility Services",
+    "category": "Consumer Services",
+    "subcategory": "Facility Management",
+    "description": "Commercial cleaning, janitorial services, facility maintenance",
+    "icon": "🧹",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 92,
+    "code": "CHILDCARE",
+    "name": "Childcare & Early Education",
+    "category": "Education",
+    "subcategory": "Early Childhood",
+    "description": "Daycare centers, preschools, after-school programs",
+    "icon": "👶",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 93,
+    "code": "ELDERCARE",
+    "name": "Elder Care & Senior Living",
+    "category": "Healthcare",
+    "subcategory": "Senior Care",
+    "description": "Nursing homes, assisted living, home healthcare for seniors",
+    "icon": "👴",
+    "growth_rate": "High"
+  },
+  {
+    "id": 94,
+    "code": "MOVING-STORAGE",
+    "name": "Moving & Storage Services",
+    "category": "Consumer Services",
+    "subcategory": "Moving & Storage",
+    "description": "Moving companies, self-storage, warehouse storage",
+    "icon": "📦",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 95,
+    "code": "RENTAL-SERVICES",
+    "name": "Equipment & Tool Rental",
+    "category": "Consumer Services",
+    "subcategory": "Rentals",
+    "description": "Equipment rental, tool rental, party rentals",
+    "icon": "🔧",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 96,
+    "code": "AUCTION-SALES",
+    "name": "Auction & Liquidation Services",
+    "category": "Retail",
+    "subcategory": "Auctions",
+    "description": "Auction houses, online auctions, estate sales",
+    "icon": "🔨",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 97,
+    "code": "TRANSLATION",
+    "name": "Translation & Localization",
+    "category": "Professional Services",
+    "subcategory": "Language Services",
+    "description": "Translation services, interpretation, localization",
+    "icon": "🌐",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 98,
+    "code": "MARKET-RESEARCH",
+    "name": "Market Research & Analytics",
+    "category": "Professional Services",
+    "subcategory": "Research",
+    "description": "Market analysis, consumer research, data analytics",
+    "icon": "📊",
+    "growth_rate": "High"
+  },
+  {
+    "id": 99,
+    "code": "CALL-CENTER",
+    "name": "Call Centers & Customer Support",
+    "category": "Professional Services",
+    "subcategory": "Customer Service",
+    "description": "Inbound/outbound call centers, customer service outsourcing",
+    "icon": "📞",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 100,
+    "code": "DATA-CENTER",
+    "name": "Data Centers & Colocation",
+    "category": "Technology",
+    "subcategory": "Infrastructure",
+    "description": "Data center facilities, server colocation, cloud infrastructure",
+    "icon": "🖥️",
+    "growth_rate": "High"
+  }
+]

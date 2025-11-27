@@ -1,0 +1,50 @@
+[
+  {
+    "code": 200,
+    "status": "OK",
+    "category": "Success",
+    "description": "Request succeeded"
+  },
+  {
+    "code": 201,
+    "status": "Created",
+    "category": "Success",
+    "description": "Resource created successfully"
+  },
+  {
+    "code": 400,
+    "status": "Bad Request",
+    "category": "Client Error",
+    "description": "Invalid request syntax"
+  },
+  {
+    "code": 401,
+    "status": "Unauthorized",
+    "category": "Client Error",
+    "description": "Authentication required"
+  },
+  {
+    "code": 403,
+    "status": "Forbidden",
+    "category": "Client Error",
+    "description": "Access denied"
+  },
+  {
+    "code": 404,
+    "status": "Not Found",
+    "category": "Client Error",
+    "description": "Resource not found"
+  },
+  {
+    "code": 500,
+    "status": "Internal Server Error",
+    "category": "Server Error",
+    "description": "Server encountered an error"
+  },
+  {
+    "code": 503,
+    "status": "Service Unavailable",
+    "category": "Server Error",
+    "description": "Server temporarily unavailable"
+  }
+]

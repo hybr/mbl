@@ -195,7 +195,7 @@
   }
 }
 
-/* Animation */
+/* Animation for items */
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -205,10 +205,6 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.miniapp-container {
-  animation: slideIn 0.3s ease-out;
 }
 
 .note-item,

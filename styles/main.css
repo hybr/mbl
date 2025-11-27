@@ -115,6 +115,49 @@ body {
   background-color: rgba(239, 68, 68, 0.1);
 }
 
+.auth-link {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--primary-color);
+  text-decoration: none;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-md);
+  background-color: rgba(37, 99, 235, 0.1);
+  transition: all var(--transition-base);
+  cursor: pointer;
+}
+
+.auth-link:hover {
+  background-color: rgba(37, 99, 235, 0.2);
+  transform: translateY(-1px);
+}
+
+.auth-link.logged-in {
+  color: var(--success-color);
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+.auth-link.logged-in:hover {
+  background-color: rgba(16, 185, 129, 0.2);
+}
+
+.header-link {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--primary-color);
+  text-decoration: none;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-md);
+  background-color: rgba(37, 99, 235, 0.1);
+  transition: all var(--transition-base);
+  cursor: pointer;
+}
+
+.header-link:hover {
+  background-color: rgba(37, 99, 235, 0.2);
+  transform: translateY(-1px);
+}
+
 .app-controls {
   position: fixed;
   top: 60px;
@@ -149,6 +192,46 @@ body {
   gap: var(--spacing-lg);
   max-width: 1400px;
   margin: 0 auto;
+}
+
+/* MiniApp Wrapper - Contains card and close button */
+.miniapp-wrapper {
+  position: relative;
+  animation: slideIn 0.3s ease-out;
+}
+
+/* MiniApp Close Button */
+.miniapp-close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--danger-color);
+  border-radius: 50%;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-base);
+  z-index: 10;
+  padding: 0;
+  opacity: 0.7;
+}
+
+.miniapp-close-btn:hover {
+  opacity: 1;
+  background-color: var(--danger-color);
+  color: white;
+  transform: scale(1.1);
+}
+
+.miniapp-close-btn:active {
+  transform: scale(0.95);
 }
 
 /* MiniApp Container */
@@ -205,6 +288,17 @@ body {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Responsive Design */
