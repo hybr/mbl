@@ -14,6 +14,7 @@ import { SettingsApp } from './apps/SettingsApp.js';
 import { PersonManagementApp } from './apps/PersonManagementApp/PersonManagementApp.js';
 import { DataViewerApp } from './apps/DataViewerApp/DataViewerApp.js';
 import { OrganizationApp } from './apps/OrganizationApp/OrganizationApp.js';
+import MessageInboxApp from './apps/MessageInboxApp/MessageInboxApp.js';
 
 class App {
   constructor() {
@@ -85,6 +86,7 @@ class App {
     this.appManager.register(PersonManagementApp);
     this.appManager.register(DataViewerApp);
     this.appManager.register(OrganizationApp);
+    this.appManager.register(MessageInboxApp);
 
     this.logger.info(`Registered ${this.appManager.getRegisteredClasses().length} MiniApps`);
   }
@@ -159,7 +161,8 @@ class App {
       'SettingsApp': 'settings-container',
       'PersonManagementApp': 'person-container',
       'DataViewerApp': 'dataviewer-container',
-      'OrganizationApp': 'organization-container'
+      'OrganizationApp': 'organization-container',
+      'MessageInboxApp': 'inbox-container'
     };
     return selectorMap[className] || `${className.toLowerCase()}-container`;
   }
@@ -520,10 +523,13 @@ class App {
    * Show notification
    */
   showNotification(message, type = 'info') {
-    // Simple notification - could be enhanced with a toast system
-    console.log(`[${type.toUpperCase()}] ${message}`);
-
-    // Could implement a toast notification system here
+    // Use MessageService if available
+    if (window.messageService) {
+      window.messageService.sendToast(message, type);
+    } else {
+      // Fallback to console
+      console.log(`[${type.toUpperCase()}] ${message}`);
+    }
   }
 
   /**

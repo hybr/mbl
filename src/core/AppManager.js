@@ -6,6 +6,9 @@
 import { LoggerFactory } from './Logger.js';
 import { eventBus } from './EventBus.js';
 import { DatabaseManager } from './DatabaseManager.js';
+import MessageService from './MessageService.js';
+import ToastNotificationManager from '../components/ToastNotificationManager.js';
+import ActionableMessageModal from '../components/ActionableMessageModal.js';
 
 class AppManager {
   constructor(options = {}) {
@@ -17,6 +20,16 @@ class AppManager {
 
     // Database manager
     this.dbManager = new DatabaseManager(options.database || {});
+
+    // Message service
+    this.messageService = new MessageService({
+      dbManager: this.dbManager,
+      eventBus: eventBus
+    });
+
+    // UI components for messaging
+    this.toastManager = new ToastNotificationManager();
+    this.modalManager = new ActionableMessageModal();
 
     // Configuration
     this.config = options.config || {};
@@ -41,6 +54,18 @@ class AppManager {
 
       // Initialize database
       await this.dbManager.init();
+
+      // Initialize message service
+      await this.messageService.init();
+
+      // Initialize UI components
+      await this.toastManager.init();
+      await this.modalManager.init();
+
+      // Make message service globally available for backward compatibility
+      if (typeof window !== 'undefined') {
+        window.messageService = this.messageService;
+      }
 
       // Setup global error handler
       this.setupErrorHandler();
@@ -115,6 +140,9 @@ class AppManager {
 
       // Inject database manager
       options.db = this.dbManager;
+
+      // Inject message service
+      options.messageService = this.messageService;
 
       // Create instance
       const instance = new MiniAppClass(options);
@@ -346,6 +374,14 @@ class AppManager {
 
       // Unmount all mini-apps
       await this.unmountAll();
+
+      // Destroy UI components
+      if (this.toastManager) {
+        await this.toastManager.destroy();
+      }
+      if (this.modalManager) {
+        await this.modalManager.destroy();
+      }
 
       // Destroy database
       if (this.dbManager) {

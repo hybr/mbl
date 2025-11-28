@@ -1,0 +1,347 @@
+/**
+ * ActionableMessageModal.css - Styles for actionable message modals
+ */
+
+/* Backdrop */
+.actionable-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 20000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  backdrop-filter: blur(2px);
+}
+
+.actionable-backdrop.backdrop-show {
+  opacity: 1;
+}
+
+/* Modal */
+.actionable-modal {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  width: calc(100% - 40px);
+  max-height: calc(100vh - 80px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: scale(0.9) translateY(-20px);
+  transition: all 0.3s ease-in-out;
+}
+
+.actionable-modal.modal-show {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+/* Shake animation for required messages */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+  20%, 40%, 60%, 80% { transform: translateX(10px); }
+}
+
+.actionable-modal.modal-shake {
+  animation: shake 0.5s;
+}
+
+/* Category bar */
+.modal-category-bar {
+  height: 4px;
+  width: 100%;
+}
+
+.modal-category-bar.modal-category-success {
+  background: #10b981;
+}
+
+.modal-category-bar.modal-category-error {
+  background: #ef4444;
+}
+
+.modal-category-bar.modal-category-warning {
+  background: #f59e0b;
+}
+
+.modal-category-bar.modal-category-info {
+  background: #3b82f6;
+}
+
+/* Header */
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 24px 24px 16px 24px;
+}
+
+.modal-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  margin-top: 2px;
+}
+
+.modal-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.modal-category-success .modal-icon {
+  color: #10b981;
+}
+
+.modal-category-error .modal-icon {
+  color: #ef4444;
+}
+
+.modal-category-warning .modal-icon {
+  color: #f59e0b;
+}
+
+.modal-category-info .modal-icon {
+  color: #3b82f6;
+}
+
+.modal-title {
+  flex: 1;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.modal-close-btn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.modal-close-btn:hover {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.modal-close-btn:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Body */
+.modal-body {
+  padding: 0 24px 24px 60px;
+  font-size: 15px;
+  color: #6b7280;
+  line-height: 1.6;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Actions */
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px 24px 24px;
+  justify-content: flex-end;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.modal-action-btn {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 80px;
+}
+
+.modal-action-btn:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Button styles */
+.modal-action-btn.btn-primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.modal-action-btn.btn-primary:hover {
+  background: #2563eb;
+}
+
+.modal-action-btn.btn-primary:active {
+  background: #1d4ed8;
+}
+
+.modal-action-btn.btn-secondary {
+  background: #e5e7eb;
+  color: #4b5563;
+}
+
+.modal-action-btn.btn-secondary:hover {
+  background: #d1d5db;
+}
+
+.modal-action-btn.btn-secondary:active {
+  background: #9ca3af;
+}
+
+.modal-action-btn.btn-danger {
+  background: #ef4444;
+  color: white;
+}
+
+.modal-action-btn.btn-danger:hover {
+  background: #dc2626;
+}
+
+.modal-action-btn.btn-danger:active {
+  background: #b91c1c;
+}
+
+.modal-action-btn.btn-success {
+  background: #10b981;
+  color: white;
+}
+
+.modal-action-btn.btn-success:hover {
+  background: #059669;
+}
+
+.modal-action-btn.btn-success:active {
+  background: #047857;
+}
+
+/* Source info */
+.modal-source {
+  padding: 8px 24px;
+  font-size: 12px;
+  color: #9ca3af;
+  text-align: right;
+  border-top: 1px solid #f3f4f6;
+  background: #fafafa;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .actionable-modal {
+    width: calc(100% - 20px);
+    max-height: calc(100vh - 40px);
+  }
+
+  .modal-header {
+    padding: 20px 16px 12px 16px;
+  }
+
+  .modal-title {
+    font-size: 18px;
+  }
+
+  .modal-body {
+    padding: 0 16px 20px 52px;
+    font-size: 14px;
+  }
+
+  .modal-actions {
+    padding: 12px 16px 20px 16px;
+    flex-wrap: wrap;
+  }
+
+  .modal-action-btn {
+    flex: 1;
+    min-width: 100px;
+  }
+
+  .modal-source {
+    padding: 8px 16px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .actionable-backdrop {
+    background: rgba(0, 0, 0, 0.7);
+  }
+
+  .actionable-modal {
+    background: #1f2937;
+  }
+
+  .modal-title {
+    color: #f9fafb;
+  }
+
+  .modal-body {
+    color: #d1d5db;
+  }
+
+  .modal-close-btn {
+    color: #6b7280;
+  }
+
+  .modal-close-btn:hover {
+    background: #374151;
+    color: #9ca3af;
+  }
+
+  .modal-actions {
+    background: #111827;
+    border-top-color: #374151;
+  }
+
+  .modal-action-btn.btn-secondary {
+    background: #374151;
+    color: #d1d5db;
+  }
+
+  .modal-action-btn.btn-secondary:hover {
+    background: #4b5563;
+  }
+
+  .modal-source {
+    background: #111827;
+    border-top-color: #374151;
+    color: #6b7280;
+  }
+}
+
+/* Accessibility */
+.actionable-modal:focus {
+  outline: none;
+}
+
+.modal-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.modal-action-btn:disabled:hover {
+  transform: none;
+}

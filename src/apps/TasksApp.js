@@ -162,9 +162,16 @@ class TasksApp extends MiniApp {
         return;
       }
 
-      const tasks = await this.db.query({
-        selector: { type: 'task' },
-        sort: [{ createdAt: 'desc' }]
+      const result = await this.db.query({
+        selector: { type: 'task' }
+      });
+
+      // Sort in JavaScript instead of database
+      const tasks = result.docs || result;
+      tasks.sort((a, b) => {
+        const dateA = new Date(a.createdAt || 0);
+        const dateB = new Date(b.createdAt || 0);
+        return dateB - dateA; // Descending order (newest first)
       });
 
       this.tasks = tasks;

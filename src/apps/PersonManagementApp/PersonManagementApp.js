@@ -744,6 +744,22 @@ class PersonManagementApp extends MiniApp {
     // Actions
     const actions = this.createElement('div', { className: 'profile-actions' });
 
+    // Quick access buttons
+    const tasksBtn = this.createElement('button', {
+      className: 'btn btn-secondary',
+      onClick: () => this.openTasksApp()
+    }, ['📋 Tasks']);
+
+    const notesBtn = this.createElement('button', {
+      className: 'btn btn-secondary',
+      onClick: () => this.openNotesApp()
+    }, ['📝 Notes']);
+
+    const messagesBtn = this.createElement('button', {
+      className: 'btn btn-secondary',
+      onClick: () => this.openMessagesApp()
+    }, ['✉️ Messages']);
+
     const editBtn = this.createElement('button', {
       className: 'btn btn-primary',
       onClick: () => this.showEditView(this.currentUser._id)
@@ -754,6 +770,9 @@ class PersonManagementApp extends MiniApp {
       onClick: () => this.logout()
     }, ['Logout']);
 
+    actions.appendChild(tasksBtn);
+    actions.appendChild(notesBtn);
+    actions.appendChild(messagesBtn);
     actions.appendChild(editBtn);
     actions.appendChild(logoutBtn);
 
@@ -895,9 +914,16 @@ class PersonManagementApp extends MiniApp {
    */
   async loadPersons() {
     try {
-      const persons = await this.db.query({
-        selector: { type: 'person' },
-        sort: [{ firstName: 'asc' }]
+      const result = await this.db.query({
+        selector: { type: 'person' }
+      });
+
+      // Sort in JavaScript instead of database
+      const persons = result.docs || result;
+      persons.sort((a, b) => {
+        const nameA = (a.firstName || '').toLowerCase();
+        const nameB = (b.firstName || '').toLowerCase();
+        return nameA.localeCompare(nameB);
       });
 
       this.persons = persons;
@@ -1299,6 +1325,54 @@ class PersonManagementApp extends MiniApp {
     } catch (error) {
       this.logger.error('Password reset failed:', error);
       Notification.error('Failed to process request. Please try again.');
+    }
+  }
+
+  /**
+   * Open Tasks App
+   */
+  async openTasksApp() {
+    try {
+      if (window.app) {
+        await window.app.toggleMiniApp('TasksApp', 'tasks-container');
+      } else {
+        this.logger.warn('Global app instance not available');
+      }
+    } catch (error) {
+      this.logger.error('Failed to open Tasks app:', error);
+      this.showError('Failed to open Tasks app');
+    }
+  }
+
+  /**
+   * Open Notes App
+   */
+  async openNotesApp() {
+    try {
+      if (window.app) {
+        await window.app.toggleMiniApp('NotesApp', 'notes-container');
+      } else {
+        this.logger.warn('Global app instance not available');
+      }
+    } catch (error) {
+      this.logger.error('Failed to open Notes app:', error);
+      this.showError('Failed to open Notes app');
+    }
+  }
+
+  /**
+   * Open Messages App (Inbox)
+   */
+  async openMessagesApp() {
+    try {
+      if (window.app) {
+        await window.app.toggleMiniApp('MessageInboxApp', 'inbox-container');
+      } else {
+        this.logger.warn('Global app instance not available');
+      }
+    } catch (error) {
+      this.logger.error('Failed to open Messages app:', error);
+      this.showError('Failed to open Messages app');
     }
   }
 

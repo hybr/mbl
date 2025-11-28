@@ -491,16 +491,36 @@
   },
   {
     "id": 50,
-    "code": "AGRI-FARM",
-    "name": "Agriculture & Farming",
+    "code": "AGRI-CROP",
+    "name": "Crop Production",
     "category": "Agriculture",
-    "subcategory": "Farming",
-    "description": "Crop production, livestock, dairy farming",
+    "subcategory": "Crop Farming",
+    "description": "Grain farming, vegetable production, fruit orchards, field crops",
     "icon": "🌾",
     "growth_rate": "Low"
   },
   {
     "id": 51,
+    "code": "AGRI-LIVESTOCK",
+    "name": "Livestock & Animal Husbandry",
+    "category": "Agriculture",
+    "subcategory": "Livestock",
+    "description": "Cattle ranching, poultry farming, pig farming, sheep farming",
+    "icon": "🐄",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 52,
+    "code": "AGRI-DAIRY",
+    "name": "Dairy Farming",
+    "category": "Agriculture",
+    "subcategory": "Dairy",
+    "description": "Milk production, dairy processing, cheese making, yogurt production",
+    "icon": "🥛",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 53,
     "code": "AGRI-TECH",
     "name": "AgriTech & Precision Farming",
     "category": "Agriculture",
@@ -510,7 +530,7 @@
     "growth_rate": "High"
   },
   {
-    "id": 52,
+    "id": 54,
     "code": "AGRI-FISH",
     "name": "Fishing & Aquaculture",
     "category": "Agriculture",
@@ -520,7 +540,47 @@
     "growth_rate": "Low"
   },
   {
-    "id": 53,
+    "id": 55,
+    "code": "AGRI-HORTI",
+    "name": "Horticulture & Greenhouse",
+    "category": "Agriculture",
+    "subcategory": "Horticulture",
+    "description": "Greenhouse farming, nurseries, ornamental plants, flowers",
+    "icon": "🌻",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 56,
+    "code": "AGRI-ORGANIC",
+    "name": "Organic & Sustainable Farming",
+    "category": "Agriculture",
+    "subcategory": "Organic Agriculture",
+    "description": "Organic farming, sustainable agriculture, permaculture, biodynamic farming",
+    "icon": "🌱",
+    "growth_rate": "High"
+  },
+  {
+    "id": 57,
+    "code": "AGRI-FORESTRY",
+    "name": "Forestry & Timber",
+    "category": "Agriculture",
+    "subcategory": "Forestry",
+    "description": "Timber harvesting, forest management, reforestation, wood production",
+    "icon": "🌲",
+    "growth_rate": "Low"
+  },
+  {
+    "id": 58,
+    "code": "AGRI-VIT",
+    "name": "Viticulture & Wine Production",
+    "category": "Agriculture",
+    "subcategory": "Viticulture",
+    "description": "Vineyard management, grape cultivation, wine making, wineries",
+    "icon": "🍇",
+    "growth_rate": "Medium"
+  },
+  {
+    "id": 59,
     "code": "TELECOM-CARRIER",
     "name": "Telecommunications Carriers",
     "category": "Telecommunications",
@@ -530,7 +590,7 @@
     "growth_rate": "Low"
   },
   {
-    "id": 54,
+    "id": 60,
     "code": "TELECOM-5G",
     "name": "5G & Network Technology",
     "category": "Telecommunications",
@@ -540,7 +600,7 @@
     "growth_rate": "High"
   },
   {
-    "id": 55,
+    "id": 61,
     "code": "LEGAL-SERVICES",
     "name": "Legal Services",
     "category": "Professional Services",
@@ -550,7 +610,7 @@
     "growth_rate": "Low"
   },
   {
-    "id": 56,
+    "id": 62,
     "code": "PROF-CONSULT",
     "name": "Management Consulting",
     "category": "Professional Services",
@@ -560,7 +620,7 @@
     "growth_rate": "Medium"
   },
   {
-    "id": 57,
+    "id": 63,
     "code": "PROF-ACCOUNT",
     "name": "Accounting & Auditing",
     "category": "Professional Services",
@@ -570,7 +630,7 @@
     "growth_rate": "Low"
   },
   {
-    "id": 58,
+    "id": 64,
     "code": "PROF-HR",
     "name": "Human Resources & Staffing",
     "category": "Professional Services",
@@ -580,7 +640,7 @@
     "growth_rate": "Medium"
   },
   {
-    "id": 59,
+    "id": 65,
     "code": "PROF-DESIGN",
     "name": "Design & Creative Services",
     "category": "Professional Services",
@@ -590,7 +650,7 @@
     "growth_rate": "Medium"
   },
   {
-    "id": 60,
+    "id": 66,
     "code": "GOV-FED",
     "name": "Federal Government",
     "category": "Government & Public Sector",
@@ -600,7 +660,7 @@
     "growth_rate": "Low"
   },
   {
-    "id": 61,
+    "id": 67,
     "code": "GOV-STATE",
     "name": "State & Local Government",
     "category": "Government & Public Sector",
@@ -610,7 +670,7 @@
     "growth_rate": "Low"
   },
   {
-    "id": 62,
+    "id": 68,
     "code": "GOV-PUBLIC",
     "name": "Public Safety & Emergency Services",
     "category": "Government & Public Sector",
@@ -620,7 +680,7 @@
     "growth_rate": "Low"
   },
   {
-    "id": 63,
+    "id": 69,
     "code": "NON-CHARITY",
     "name": "Charities & Foundations",
     "category": "Non-Profit",
@@ -630,7 +690,7 @@
     "growth_rate": "Low"
   },
   {
-    "id": 64,
+    "id": 70,
     "code": "NON-SOCIAL",
     "name": "Social Services & Advocacy",
     "category": "Non-Profit",
@@ -640,7 +700,7 @@
     "growth_rate": "Low"
   },
   {
-    "id": 65,
+    "id": 71,
     "code": "NON-RESEARCH",
     "name": "Research & Think Tanks",
     "category": "Non-Profit",
@@ -650,7 +710,7 @@
     "growth_rate": "Low"
   },
   {
-    "id": 66,
+    "id": 72,
     "code": "SPORT-PROF",
     "name": "Professional Sports",
     "category": "Sports & Recreation",
@@ -660,7 +720,7 @@
     "growth_rate": "Medium"
   },
   {
-    "id": 67,
+    "id": 73,
     "code": "SPORT-FIT",
     "name": "Fitness & Wellness",
     "category": "Sports & Recreation",
@@ -670,7 +730,7 @@
     "growth_rate": "High"
   },
   {
-    "id": 68,
+    "id": 74,
     "code": "SPORT-OUTDOOR",
     "name": "Outdoor Recreation & Adventure",
     "category": "Sports & Recreation",
@@ -680,7 +740,7 @@
     "growth_rate": "Medium"
   },
   {
-    "id": 69,
+    "id": 75,
     "code": "ENV-WASTE",
     "name": "Waste Management & Recycling",
     "category": "Environmental Services",
@@ -690,7 +750,7 @@
     "growth_rate": "Medium"
   },
   {
-    "id": 70,
+    "id": 76,
     "code": "ENV-CONSULT",
     "name": "Environmental Consulting & Services",
     "category": "Environmental Services",
@@ -700,7 +760,7 @@
     "growth_rate": "Medium"
   },
   {
-    "id": 71,
+    "id": 77,
     "code": "ENV-WATER",
     "name": "Water & Wastewater Treatment",
     "category": "Environmental Services",
@@ -710,7 +770,7 @@
     "growth_rate": "Low"
   },
   {
-    "id": 72,
+    "id": 78,
     "code": "MINING-COAL",
     "name": "Mining & Minerals",
     "category": "Mining & Extraction",
@@ -720,7 +780,7 @@
     "growth_rate": "Low"
   },
   {
-    "id": 73,
+    "id": 79,
     "code": "MINING-METAL",
     "name": "Metals & Steel Production",
     "category": "Mining & Extraction",
@@ -730,7 +790,7 @@
     "growth_rate": "Low"
   },
   {
-    "id": 74,
+    "id": 80,
     "code": "LUXURY-GOODS",
     "name": "Luxury Goods & Jewelry",
     "category": "Retail",
@@ -740,7 +800,7 @@
     "growth_rate": "Medium"
   },
   {
-    "id": 75,
+    "id": 81,
     "code": "PET-CARE",
     "name": "Pet Care & Veterinary Services",
     "category": "Consumer Services",
@@ -750,7 +810,7 @@
     "growth_rate": "High"
   },
   {
-    "id": 76,
+    "id": 82,
     "code": "BEAUTY-PERSONAL",
     "name": "Beauty & Personal Care",
     "category": "Consumer Services",
@@ -760,7 +820,7 @@
     "growth_rate": "Medium"
   },
   {
-    "id": 77,
+    "id": 83,
     "code": "FUNERAL-SERVICES",
     "name": "Funeral & Cemetery Services",
     "category": "Consumer Services",
@@ -770,7 +830,7 @@
     "growth_rate": "Low"
   },
   {
-    "id": 78,
+    "id": 84,
     "code": "SPACE-TECH",
     "name": "Space Technology & Exploration",
     "category": "Technology",
@@ -780,7 +840,7 @@
     "growth_rate": "Very High"
   },
   {
-    "id": 79,
+    "id": 85,
     "code": "DRONE-TECH",
     "name": "Drones & UAV Technology",
     "category": "Technology",
@@ -790,7 +850,7 @@
     "growth_rate": "High"
   },
   {
-    "id": 80,
+    "id": 86,
     "code": "ROBOTICS",
     "name": "Robotics & Automation",
     "category": "Technology",
@@ -800,7 +860,7 @@
     "growth_rate": "Very High"
   },
   {
-    "id": 81,
+    "id": 87,
     "code": "IOT-SMART",
     "name": "IoT & Smart Devices",
     "category": "Technology",
@@ -810,7 +870,7 @@
     "growth_rate": "Very High"
   },
   {
-    "id": 82,
+    "id": 88,
     "code": "VR-AR",
     "name": "Virtual Reality & Augmented Reality",
     "category": "Technology",
@@ -820,7 +880,7 @@
     "growth_rate": "High"
   },
   {
-    "id": 83,
+    "id": 89,
     "code": "QUANTUM-COMP",
     "name": "Quantum Computing",
     "category": "Technology",
@@ -830,7 +890,7 @@
     "growth_rate": "Very High"
   },
   {
-    "id": 84,
+    "id": 90,
     "code": "CANNABIS",
     "name": "Cannabis & Hemp Products",
     "category": "Agriculture",
@@ -840,7 +900,7 @@
     "growth_rate": "Very High"
   },
   {
-    "id": 85,
+    "id": 91,
     "code": "MUSIC-PROD",
     "name": "Music Production & Recording",
     "category": "Media & Entertainment",
@@ -850,7 +910,7 @@
     "growth_rate": "Medium"
   },
   {
-    "id": 86,
+    "id": 92,
     "code": "FILM-PROD",
     "name": "Film & Video Production",
     "category": "Media & Entertainment",
@@ -860,7 +920,7 @@
     "growth_rate": "Medium"
   },
   {
-    "id": 87,
+    "id": 93,
     "code": "PHOTO-SERVICES",
     "name": "Photography Services",
     "category": "Professional Services",
@@ -870,7 +930,7 @@
     "growth_rate": "Low"
   },
   {
-    "id": 88,
+    "id": 94,
     "code": "PRINTING-PUB",
     "name": "Printing & Publishing Services",
     "category": "Manufacturing",
@@ -880,7 +940,7 @@
     "growth_rate": "Low"
   },
   {
-    "id": 89,
+    "id": 95,
     "code": "PACKAGING",
     "name": "Packaging & Containers",
     "category": "Manufacturing",
@@ -890,7 +950,7 @@
     "growth_rate": "Medium"
   },
   {
-    "id": 90,
+    "id": 96,
     "code": "SECURITY-SERVICES",
     "name": "Security Services & Equipment",
     "category": "Professional Services",
@@ -900,7 +960,7 @@
     "growth_rate": "Medium"
   },
   {
-    "id": 91,
+    "id": 97,
     "code": "CLEANING-SERVICES",
     "name": "Cleaning & Facility Services",
     "category": "Consumer Services",
@@ -910,7 +970,7 @@
     "growth_rate": "Low"
   },
   {
-    "id": 92,
+    "id": 98,
     "code": "CHILDCARE",
     "name": "Childcare & Early Education",
     "category": "Education",
@@ -920,7 +980,7 @@
     "growth_rate": "Medium"
   },
   {
-    "id": 93,
+    "id": 99,
     "code": "ELDERCARE",
     "name": "Elder Care & Senior Living",
     "category": "Healthcare",
@@ -930,7 +990,7 @@
     "growth_rate": "High"
   },
   {
-    "id": 94,
+    "id": 100,
     "code": "MOVING-STORAGE",
     "name": "Moving & Storage Services",
     "category": "Consumer Services",
@@ -940,7 +1000,7 @@
     "growth_rate": "Medium"
   },
   {
-    "id": 95,
+    "id": 101,
     "code": "RENTAL-SERVICES",
     "name": "Equipment & Tool Rental",
     "category": "Consumer Services",
@@ -950,7 +1010,7 @@
     "growth_rate": "Medium"
   },
   {
-    "id": 96,
+    "id": 102,
     "code": "AUCTION-SALES",
     "name": "Auction & Liquidation Services",
     "category": "Retail",
@@ -960,7 +1020,7 @@
     "growth_rate": "Low"
   },
   {
-    "id": 97,
+    "id": 103,
     "code": "TRANSLATION",
     "name": "Translation & Localization",
     "category": "Professional Services",
@@ -970,7 +1030,7 @@
     "growth_rate": "Medium"
   },
   {
-    "id": 98,
+    "id": 104,
     "code": "MARKET-RESEARCH",
     "name": "Market Research & Analytics",
     "category": "Professional Services",
@@ -980,7 +1040,7 @@
     "growth_rate": "High"
   },
   {
-    "id": 99,
+    "id": 105,
     "code": "CALL-CENTER",
     "name": "Call Centers & Customer Support",
     "category": "Professional Services",
@@ -990,7 +1050,7 @@
     "growth_rate": "Low"
   },
   {
-    "id": 100,
+    "id": 106,
     "code": "DATA-CENTER",
     "name": "Data Centers & Colocation",
     "category": "Technology",

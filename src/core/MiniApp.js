@@ -37,6 +37,9 @@ class MiniApp {
     // Database manager reference (injected by AppManager)
     this.db = options.db || null;
 
+    // Message service reference (injected by AppManager)
+    this.messageService = options.messageService || null;
+
     this.logger.debug(`MiniApp constructed: ${this.id}`);
   }
 
@@ -159,6 +162,86 @@ class MiniApp {
    */
   emit(event, data) {
     eventBus.emit(event, data);
+  }
+
+  // ===== Message Service Integration =====
+
+  /**
+   * Send a message (injected by AppManager)
+   * Automatically adds source app information
+   */
+  sendMessage(messageData) {
+    if (!this.messageService) {
+      this.logger.warn('MessageService not available');
+      return Promise.resolve({ success: false, error: 'Service unavailable' });
+    }
+
+    // Automatically add source app info
+    return this.messageService.send({
+      ...messageData,
+      sourceApp: this.name
+    });
+  }
+
+  /**
+   * Register message action handler
+   * @param {string} actionName - Name of the action
+   * @param {Function} callback - Callback function to execute
+   */
+  registerMessageAction(actionName, callback) {
+    if (!this.messageService) {
+      this.logger.warn('MessageService not available');
+      return;
+    }
+
+    this.messageService.registerActionHandler(
+      this.name,
+      actionName,
+      callback.bind(this)
+    );
+  }
+
+  /**
+   * Show toast notification
+   */
+  showToast(message, category = 'info', duration = 3000) {
+    return this.sendMessage({
+      messageType: 'toast',
+      title: message,
+      category,
+      displayConfig: {
+        autoDismiss: true,
+        dismissAfter: duration
+      }
+    });
+  }
+
+  /**
+   * Show success toast
+   */
+  showSuccess(message, duration = 3000) {
+    return this.showToast(message, 'success', duration);
+  }
+
+  /**
+   * Show error toast
+   */
+  showError(message, duration = 5000) {
+    return this.showToast(message, 'error', duration);
+  }
+
+  /**
+   * Show warning toast
+   */
+  showWarning(message, duration = 4000) {
+    return this.showToast(message, 'warning', duration);
+  }
+
+  /**
+   * Show info toast
+   */
+  showInfo(message, duration = 3000) {
+    return this.showToast(message, 'info', duration);
   }
 
   /**

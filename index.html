@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-  <meta name="description" content="Pure JavaScript MiniApp Architecture with PouchDB">
+  <meta name="description" content="Vocal 4 Local - Connecting vocal customers with local businesses through smart geo-sensing technology">
+  <meta name="keywords" content="local business, geo-sensing, vocal for local, V4L, community, nearby businesses">
   <meta name="theme-color" content="#2563eb">
 
-  <title>MiniApp System</title>
+  <title>V4L - Vocal 4 Local</title>
 
   <!-- PouchDB -->
   <script src="https://cdn.jsdelivr.net/npm/pouchdb@8.0.1/dist/pouchdb.min.js"></script>
@@ -19,6 +20,11 @@
   <link rel="stylesheet" href="src/apps/PersonManagementApp/PersonManagementApp.css">
   <link rel="stylesheet" href="src/apps/DataViewerApp/DataViewerApp.css">
   <link rel="stylesheet" href="src/apps/OrganizationApp/OrganizationApp.css">
+
+  <!-- Message System Styles -->
+  <link rel="stylesheet" href="src/components/ToastNotificationManager.css">
+  <link rel="stylesheet" href="src/components/ActionableMessageModal.css">
+  <link rel="stylesheet" href="src/apps/MessageInboxApp/MessageInboxApp.css">
 
   <!-- Prevent iOS bounce -->
   <style>
@@ -34,7 +40,10 @@
   <!-- App Header -->
   <header class="app-header">
     <div class="header-content">
-      <h1 class="app-title">MiniApp System</h1>
+      <div class="app-branding">
+        <h1 class="app-title">V4L</h1>
+        <span class="app-tagline">Vocal 4 Local</span>
+      </div>
       <div class="header-status">
         <a href="#" id="organization-link" class="header-link">Org</a>
         <!-- <span id="network-status" class="status-indicator status-online">Online</span> -->
@@ -53,6 +62,18 @@
 
   <!-- Main Content Area -->
   <main class="app-main">
+    <!-- Welcome Banner -->
+    <div class="welcome-banner" id="welcome-banner">
+      <button class="welcome-banner-close" id="welcome-banner-close" aria-label="Close welcome banner">&times;</button>
+      <div class="welcome-content">
+        <h2 class="welcome-title">Welcome to V4L - Vocal 4 Local</h2>
+        <p class="welcome-description">
+          Connecting vocal customers with local businesses through smart geo-sensing technology.
+          Discover and support businesses in your community while they discover you.
+        </p>
+      </div>
+    </div>
+
     <!-- MiniApp Containers - Dynamically added -->
     <div class="miniapp-grid" id="miniapp-grid">
       <!-- MiniApp cards will be prepended here dynamically -->

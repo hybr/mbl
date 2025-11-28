@@ -86,10 +86,26 @@ body {
   margin: 0 auto;
 }
 
+.app-branding {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .app-title {
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  font-weight: 700;
   color: var(--primary-color);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.app-tagline {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .header-status {
@@ -194,6 +210,48 @@ body {
   overflow-x: hidden;
   padding: var(--spacing-md);
   -webkit-overflow-scrolling: touch;
+}
+
+/* Welcome Banner */
+.welcome-banner {
+  max-width: 1400px;
+  margin: 0 auto var(--spacing-xl) auto;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-lg);
+  animation: slideDown 0.5s ease-out;
+}
+
+.welcome-content {
+  text-align: center;
+}
+
+.welcome-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: var(--spacing-md);
+  line-height: 1.2;
+}
+
+.welcome-description {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .miniapp-grid {
@@ -314,7 +372,11 @@ body {
 /* Responsive Design */
 @media (max-width: 768px) {
   .app-title {
-    font-size: 1rem;
+    font-size: 1.25rem;
+  }
+
+  .app-tagline {
+    font-size: 0.65rem;
   }
 
   .header-status {
@@ -324,6 +386,19 @@ body {
   .status-indicator {
     font-size: 0.75rem;
     padding: var(--spacing-xs);
+  }
+
+  .welcome-banner {
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .welcome-title {
+    font-size: 1.25rem;
+  }
+
+  .welcome-description {
+    font-size: 0.875rem;
   }
 
   .miniapp-grid {

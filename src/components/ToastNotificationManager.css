@@ -1,0 +1,241 @@
+/**
+ * ToastNotificationManager.css - Styles for toast notifications
+ */
+
+/* Container positioning */
+.toast-container {
+  position: fixed;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+  pointer-events: none;
+}
+
+.toast-container.toast-top-right {
+  top: 20px;
+  right: 20px;
+}
+
+.toast-container.toast-top-left {
+  top: 20px;
+  left: 20px;
+}
+
+.toast-container.toast-bottom-right {
+  bottom: 20px;
+  right: 20px;
+}
+
+.toast-container.toast-bottom-left {
+  bottom: 20px;
+  left: 20px;
+}
+
+/* Toast base styles */
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-left: 4px solid;
+  pointer-events: auto;
+  min-width: 300px;
+  max-width: 400px;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.3s ease-in-out;
+}
+
+/* Show/hide animations */
+.toast.toast-show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast.toast-hide {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+/* Category colors */
+.toast.toast-success {
+  border-left-color: #10b981;
+}
+
+.toast.toast-success .toast-icon {
+  color: #10b981;
+}
+
+.toast.toast-error {
+  border-left-color: #ef4444;
+}
+
+.toast.toast-error .toast-icon {
+  color: #ef4444;
+}
+
+.toast.toast-warning {
+  border-left-color: #f59e0b;
+}
+
+.toast.toast-warning .toast-icon {
+  color: #f59e0b;
+}
+
+.toast.toast-info {
+  border-left-color: #3b82f6;
+}
+
+.toast.toast-info .toast-icon {
+  color: #3b82f6;
+}
+
+/* Icon */
+.toast-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+}
+
+/* Content */
+.toast-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.toast-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 4px;
+  word-wrap: break-word;
+}
+
+.toast-body {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+/* Close button */
+.toast-close {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.toast-close:hover {
+  color: #4b5563;
+}
+
+.toast-close:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Clickable toast */
+.toast.toast-clickable {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toast.toast-clickable:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+.toast.toast-clickable:active {
+  transform: translateY(0);
+}
+
+/* Priority indicators */
+.toast.toast-priority-critical {
+  border-left-width: 6px;
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
+}
+
+.toast.toast-priority-high {
+  border-left-width: 5px;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .toast-container {
+    max-width: calc(100vw - 40px);
+    left: 20px !important;
+    right: 20px !important;
+  }
+
+  .toast {
+    min-width: unset;
+    max-width: 100%;
+  }
+
+  .toast-container.toast-top-right,
+  .toast-container.toast-top-left {
+    top: 10px;
+  }
+
+  .toast-container.toast-bottom-right,
+  .toast-container.toast-bottom-left {
+    bottom: 10px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .toast {
+    background: #1f2937;
+  }
+
+  .toast-title {
+    color: #f9fafb;
+  }
+
+  .toast-body {
+    color: #d1d5db;
+  }
+
+  .toast-close {
+    color: #6b7280;
+  }
+
+  .toast-close:hover {
+    color: #9ca3af;
+  }
+}
+
+/* Animation for left-side containers */
+.toast-container.toast-top-left .toast,
+.toast-container.toast-bottom-left .toast {
+  transform: translateX(-100%);
+}
+
+.toast-container.toast-top-left .toast.toast-show,
+.toast-container.toast-bottom-left .toast.toast-show {
+  transform: translateX(0);
+}
+
+.toast-container.toast-top-left .toast.toast-hide,
+.toast-container.toast-bottom-left .toast.toast-hide {
+  transform: translateX(-100%);
+}

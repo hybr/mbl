@@ -1,4 +1,20 @@
-# MiniApp System - Pure JavaScript Architecture
+# V4L - Vocal 4 Local
+
+**Connecting vocal customers with local businesses through smart geo-sensing technology**
+
+## About V4L
+
+V4L (Vocal 4 Local) is a revolutionary platform designed to bridge the gap between passionate, vocal customers and local businesses in their community. Through smart geo-sensing technology, we ensure that customers and businesses discover each other at the right time and place.
+
+### Our Mission
+- **Empower Local Businesses**: Help them connect with their community
+- **Support Vocal Customers**: Those passionate about local commerce
+- **Build Communities**: Through meaningful connections and authentic experiences
+- **Smart Geo-Sensing**: Location-aware discovery and recommendations
+
+---
+
+## Technical Architecture
 
 A scalable, offline-first mobile application architecture built with **Pure JavaScript Classes**, **PouchDB**, and **Capacitor**. This system supports hundreds of mini-applications running simultaneously with real-time data synchronization.
 

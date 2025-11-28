@@ -117,9 +117,16 @@ class NotesApp extends MiniApp {
         return;
       }
 
-      const notes = await this.db.query({
-        selector: { type: 'note' },
-        sort: [{ createdAt: 'desc' }]
+      const result = await this.db.query({
+        selector: { type: 'note' }
+      });
+
+      // Sort in JavaScript instead of database
+      const notes = result.docs || result;
+      notes.sort((a, b) => {
+        const dateA = new Date(a.createdAt || 0);
+        const dateB = new Date(b.createdAt || 0);
+        return dateB - dateA; // Descending order (newest first)
       });
 
       this.notes = notes;
