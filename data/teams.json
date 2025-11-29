@@ -670,5 +670,65 @@
     "icon": "📊",
     "typical_size": "2-5 people",
     "typical_roles": ["Growth Analyst", "Experimentation Analyst", "Analytics Lead"]
+  },
+  {
+    "id": 57,
+    "departmentId": 23,
+    "departmentCode": "FACILITIES",
+    "departmentName": "Facilities Management",
+    "teamName": "Facilities Operations",
+    "teamCode": "FAC-OPS",
+    "description": "General building operations, maintenance coordination",
+    "icon": "🏢",
+    "typical_size": "3-10 people",
+    "typical_roles": ["Facilities Manager", "Operations Coordinator", "Facilities Supervisor"]
+  },
+  {
+    "id": 58,
+    "departmentId": 23,
+    "departmentCode": "FACILITIES",
+    "departmentName": "Facilities Management",
+    "teamName": "Building Maintenance",
+    "teamCode": "MAINTENANCE",
+    "description": "HVAC, electrical, plumbing, structural maintenance",
+    "icon": "🔧",
+    "typical_size": "5-20 people",
+    "typical_roles": ["Maintenance Technician", "HVAC Technician", "Electrician", "Plumber"]
+  },
+  {
+    "id": 59,
+    "departmentId": 23,
+    "departmentCode": "FACILITIES",
+    "departmentName": "Facilities Management",
+    "teamName": "Workplace Services",
+    "teamCode": "WORKPLACE-SVC",
+    "description": "Reception, mail room, office services, janitorial",
+    "icon": "🧹",
+    "typical_size": "5-15 people",
+    "typical_roles": ["Receptionist", "Mail Clerk", "Office Services Coordinator", "Custodian"]
+  },
+  {
+    "id": 60,
+    "departmentId": 23,
+    "departmentCode": "FACILITIES",
+    "departmentName": "Facilities Management",
+    "teamName": "Safety & Security",
+    "teamCode": "SAFETY-SEC",
+    "description": "Building security, safety compliance, emergency preparedness",
+    "icon": "🛡️",
+    "typical_size": "3-10 people",
+    "typical_roles": ["Security Officer", "Safety Manager", "Security Coordinator"]
+  },
+  {
+    "id": 61,
+    "departmentId": 23,
+    "departmentCode": "FACILITIES",
+    "departmentName": "Facilities Management",
+    "teamName": "Space Planning",
+    "teamCode": "SPACE-PLAN",
+    "description": "Office layout, moves, workspace optimization, furniture",
+    "icon": "📐",
+    "typical_size": "2-6 people",
+    "typical_roles": ["Space Planner", "Move Coordinator", "Workspace Manager", "Furniture Coordinator"]
   }
 ]

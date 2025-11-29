@@ -15,6 +15,7 @@ import { PersonManagementApp } from './apps/PersonManagementApp/PersonManagement
 import { DataViewerApp } from './apps/DataViewerApp/DataViewerApp.js';
 import { OrganizationApp } from './apps/OrganizationApp/OrganizationApp.js';
 import MessageInboxApp from './apps/MessageInboxApp/MessageInboxApp.js';
+import { BranchManagementApp } from './apps/BranchManagementApp/BranchManagementApp.js';
 
 class App {
   constructor() {
@@ -87,6 +88,7 @@ class App {
     this.appManager.register(DataViewerApp);
     this.appManager.register(OrganizationApp);
     this.appManager.register(MessageInboxApp);
+    this.appManager.register(BranchManagementApp);
 
     this.logger.info(`Registered ${this.appManager.getRegisteredClasses().length} MiniApps`);
   }
@@ -95,6 +97,9 @@ class App {
    * Setup UI controls
    */
   setupUI() {
+    // Welcome banner close button and auto-dismiss
+    this.setupWelcomeBanner();
+
     // App controls
     const toggleNotesBtn = document.getElementById('toggle-notes');
     const toggleTasksBtn = document.getElementById('toggle-tasks');
@@ -139,6 +144,15 @@ class App {
       });
     }
 
+    // Branch link
+    const branchLink = document.getElementById('branch-link');
+    if (branchLink) {
+      branchLink.addEventListener('click', async (e) => {
+        e.preventDefault();
+        await this.toggleMiniApp('BranchManagementApp', 'branch-container');
+      });
+    }
+
     // Status indicators
     this.updateNetworkStatus();
 
@@ -162,7 +176,8 @@ class App {
       'PersonManagementApp': 'person-container',
       'DataViewerApp': 'dataviewer-container',
       'OrganizationApp': 'organization-container',
-      'MessageInboxApp': 'inbox-container'
+      'MessageInboxApp': 'inbox-container',
+      'BranchManagementApp': 'branch-container'
     };
     return selectorMap[className] || `${className.toLowerCase()}-container`;
   }
@@ -419,6 +434,57 @@ class App {
       // Show login view
       personApp.showLoginView();
     }
+  }
+
+  /**
+   * Setup welcome banner with close button and auto-dismiss
+   */
+  setupWelcomeBanner() {
+    const banner = document.getElementById('welcome-banner');
+    const closeBtn = document.getElementById('welcome-banner-close');
+
+    if (!banner) return;
+
+    // Check if banner was previously dismissed
+    const bannerDismissed = localStorage.getItem('welcomeBannerDismissed');
+    if (bannerDismissed === 'true') {
+      banner.style.display = 'none';
+      return;
+    }
+
+    // Close button handler
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        this.dismissWelcomeBanner();
+      });
+    }
+
+    // Auto-dismiss after 10 seconds
+    setTimeout(() => {
+      this.dismissWelcomeBanner();
+    }, 10000);
+  }
+
+  /**
+   * Dismiss welcome banner with animation
+   */
+  dismissWelcomeBanner() {
+    const banner = document.getElementById('welcome-banner');
+    if (!banner) return;
+
+    // Add fade-out animation
+    banner.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+    banner.style.opacity = '0';
+    banner.style.transform = 'translateY(-20px)';
+
+    // Remove from DOM after animation
+    setTimeout(() => {
+      banner.style.display = 'none';
+      // Save dismissal state to localStorage
+      localStorage.setItem('welcomeBannerDismissed', 'true');
+    }, 500);
+
+    this.logger.info('Welcome banner dismissed');
   }
 
   /**

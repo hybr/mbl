@@ -9,7 +9,12 @@
       "Bash(find:*)",
       "Bash(tree:*)",
       "Bash(npm start)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(timeout 3 bash:*)",
+      "Bash(curl:*)",
+      "Bash(timeout 5 bash:*)",
+      "Bash(dir \"C:\\Users\\fwyog\\mbl\\src\" /s /b)",
+      "Bash(git log:*)"
     ],
     "deny": [],
     "ask": []
