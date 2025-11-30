@@ -290,6 +290,15 @@ class OrganizationApp extends MiniApp {
         onClick: () => this.openDataViewer()
       });
       actions.appendChild(this.components.readonlyDataBtn.create());
+
+      // Add Branches button
+      this.components.branchesBtn = new Button({
+        text: 'Branches',
+        className: 'btn btn-secondary',
+        onClick: () => this.openBranchManagement()
+      });
+      actions.appendChild(this.components.branchesBtn.create());
+
     } else {
       const loginMsg = this.createElement('div', {
         className: 'login-message'
@@ -878,6 +887,24 @@ class OrganizationApp extends MiniApp {
     }
 
     this.logger.info('Opening DataViewerApp');
+  }
+
+  /**
+   * Open BranchManagementApp
+   */
+  openBranchManagement() {
+    // Emit event to toggle BranchManagementApp
+    this.emit('app:toggleMiniApp', {
+      className: 'BranchManagementApp',
+      containerSelector: 'branch-container'
+    });
+
+    // Alternative: Use the global app instance if available
+    if (window.app && window.app.toggleMiniApp) {
+      window.app.toggleMiniApp('BranchManagementApp', 'branch-container');
+    }
+
+    this.logger.info('Opening BranchManagementApp');
   }
 
   /**

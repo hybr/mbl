@@ -770,11 +770,17 @@ class PersonManagementApp extends MiniApp {
       onClick: () => this.logout()
     }, ['Logout']);
 
+    const educationBtn = this.createElement('button', {
+      className: 'btn btn-secondary',
+      onClick: () => this.openEducationApp()
+    }, ['🎓 Education']);
+
     actions.appendChild(tasksBtn);
     actions.appendChild(notesBtn);
     actions.appendChild(messagesBtn);
     actions.appendChild(editBtn);
     actions.appendChild(logoutBtn);
+    actions.appendChild(educationBtn);
 
     // Assemble
     profileCard.appendChild(avatarSection);
@@ -1373,6 +1379,22 @@ class PersonManagementApp extends MiniApp {
     } catch (error) {
       this.logger.error('Failed to open Messages app:', error);
       this.showError('Failed to open Messages app');
+    }
+  }
+
+  /**
+   * Open Education App
+   */
+  async openEducationApp() {
+    try {
+      if (window.app) {
+        await window.app.toggleMiniApp('EducationManagementApp', 'education-container');
+      } else {
+        this.logger.warn('Global app instance not available');
+      }
+    } catch (error) {
+      this.logger.error('Failed to open Education app:', error);
+      this.showError('Failed to open Education app');
     }
   }
 

@@ -16,6 +16,7 @@ import { DataViewerApp } from './apps/DataViewerApp/DataViewerApp.js';
 import { OrganizationApp } from './apps/OrganizationApp/OrganizationApp.js';
 import MessageInboxApp from './apps/MessageInboxApp/MessageInboxApp.js';
 import { BranchManagementApp } from './apps/BranchManagementApp/BranchManagementApp.js';
+import { EducationManagementApp } from './apps/EducationManagementApp/EducationManagementApp.js';
 
 class App {
   constructor() {
@@ -89,6 +90,7 @@ class App {
     this.appManager.register(OrganizationApp);
     this.appManager.register(MessageInboxApp);
     this.appManager.register(BranchManagementApp);
+    this.appManager.register(EducationManagementApp);
 
     this.logger.info(`Registered ${this.appManager.getRegisteredClasses().length} MiniApps`);
   }
@@ -153,6 +155,15 @@ class App {
       });
     }
 
+    // Education link
+    const educationLink = document.getElementById('education-link');
+    if (educationLink) {
+      educationLink.addEventListener('click', async (e) => {
+        e.preventDefault();
+        await this.toggleMiniApp('EducationManagementApp', 'education-container');
+      });
+    }
+
     // Status indicators
     this.updateNetworkStatus();
 
@@ -177,7 +188,8 @@ class App {
       'DataViewerApp': 'dataviewer-container',
       'OrganizationApp': 'organization-container',
       'MessageInboxApp': 'inbox-container',
-      'BranchManagementApp': 'branch-container'
+      'BranchManagementApp': 'branch-container',
+      'EducationManagementApp': 'education-container'
     };
     return selectorMap[className] || `${className.toLowerCase()}-container`;
   }
@@ -311,6 +323,17 @@ class App {
       await this.unmountMiniApp(className);
     } else {
       await this.mountMiniApp(className, containerSelector);
+
+      // Move focus to the mounted app
+      const container = document.getElementById(containerSelector);
+      if (container) {
+        // Scroll the container into view smoothly
+        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // Optional: Set focus on the container for keyboard navigation
+        container.setAttribute('tabindex', '-1');
+        container.focus();
+      }
     }
   }
 
