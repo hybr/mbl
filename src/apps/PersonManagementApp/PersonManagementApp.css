@@ -293,12 +293,15 @@
   padding: 24px 32px;
   background: #f7fafc;
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   border-top: 1px solid #e2e8f0;
+  justify-content: flex-start;
 }
 
 .profile-actions .btn {
-  flex: 1;
+  flex: 1 1 140px;
+  min-width: 120px;
   padding: 12px 24px;
   font-size: 14px;
   font-weight: 600;

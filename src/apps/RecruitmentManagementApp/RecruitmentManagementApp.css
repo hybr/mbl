@@ -1,0 +1,596 @@
+/**
+ * RecruitmentManagementApp Styles
+ */
+
+/* ==========================================
+   GLOBAL STYLES
+   ========================================== */
+
+#recruitment-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* ==========================================
+   HEADER STYLES
+   ========================================== */
+
+.miniapp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.miniapp-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 24px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* ==========================================
+   FILTERS
+   ========================================== */
+
+.vacancy-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.filter-group .input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* ==========================================
+   VACANCY LIST
+   ========================================== */
+
+.vacancy-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.vacancy-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.vacancy-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.vacancy-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.vacancy-card-org {
+  font-size: 14px;
+  color: #667eea;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.vacancy-card-dept {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.vacancy-card-details {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 12px;
+}
+
+.vacancy-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* ==========================================
+   STATUS BADGES
+   ========================================== */
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-draft {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.status-open {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-closed {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status-filled {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.status-not_started {
+  background: #f0f0f0;
+  color: #555;
+}
+
+.status-in_progress {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-completed {
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+.status-applied {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-screening {
+  background: #cfe2ff;
+  color: #084298;
+}
+
+.status-interview {
+  background: #d0e7ff;
+  color: #055160;
+}
+
+.status-offer {
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+.status-rejected {
+  background: #f8d7da;
+  color: #842029;
+}
+
+.status-hired {
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+.applied-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  background: #d1e7dd;
+  color: #0f5132;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ==========================================
+   VACANCY FORM
+   ========================================== */
+
+.vacancy-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: #f9f9f9;
+  padding: 24px;
+  border-radius: 8px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-group .input {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.form-group textarea.input {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* ==========================================
+   VACANCY DETAILS
+   ========================================== */
+
+.vacancy-details {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.vacancy-details h2 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 24px;
+}
+
+.detail-row {
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+  color: #666;
+}
+
+.detail-section {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 2px solid #e0e0e0;
+}
+
+.detail-section h3 {
+  margin: 0 0 12px 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.detail-text {
+  color: #666;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.vacancy-details-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* ==========================================
+   APPLICATION FORM
+   ========================================== */
+
+.application-form {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.application-vacancy-info {
+  background: #f0f7ff;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* ==========================================
+   APPLICATION LIST
+   ========================================== */
+
+.application-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.application-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  transition: box-shadow 0.2s;
+}
+
+.application-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.application-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.application-card-date,
+.application-card-stage,
+.application-card-applicant {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.application-card-onboarding {
+  font-size: 13px;
+  color: #0f5132;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.application-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* ==========================================
+   BUTTONS
+   ========================================== */
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.btn-secondary:hover {
+  background: #d0d0d0;
+}
+
+.btn-small {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.vacancy-actions {
+  margin-bottom: 20px;
+}
+
+/* ==========================================
+   APPLICATION DETAILS
+   ========================================== */
+
+.application-details-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.stage-timeline {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.stage-timeline h3 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.stage-entry {
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.stage-entry:last-child {
+  border-bottom: none;
+}
+
+.stage-entry-title {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.stage-entry-date {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.stage-entry-notes {
+  font-size: 13px;
+  color: #555;
+}
+
+.application-workflow-form {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+/* ==========================================
+   ONBOARDING
+   ========================================== */
+
+.onboarding-section {
+  margin-top: 24px;
+}
+
+.onboarding-section h3 {
+  margin-bottom: 12px;
+}
+
+.onboarding-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.onboarding-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.onboarding-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.onboarding-task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.onboarding-task-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.onboarding-task-name {
+  font-weight: 500;
+  color: #333;
+  flex: 1;
+}
+
+.onboarding-task-status {
+  font-size: 13px;
+  color: #555;
+  font-weight: 600;
+}
+
+.onboarding-task-select {
+  width: 180px;
+}
+
+.onboarding-completion {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #0f5132;
+  font-weight: 500;
+}
+
+/* ==========================================
+   EMPTY STATES
+   ========================================== */
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-size: 16px;
+}
+
+.info-message {
+  background: #e7f3ff;
+  border: 1px solid #b3d9ff;
+  border-radius: 6px;
+  padding: 16px;
+  color: #004085;
+  text-align: center;
+  margin: 20px 0;
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+
+@media (max-width: 768px) {
+  #recruitment-container {
+    padding: 12px;
+  }
+
+  .vacancy-filters {
+    flex-direction: column;
+  }
+
+  .filter-group {
+    min-width: 100%;
+  }
+
+  .vacancy-card,
+  .application-card {
+    padding: 16px;
+  }
+
+  .vacancy-form {
+    padding: 16px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}
+

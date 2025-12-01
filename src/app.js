@@ -17,6 +17,8 @@ import { OrganizationApp } from './apps/OrganizationApp/OrganizationApp.js';
 import MessageInboxApp from './apps/MessageInboxApp/MessageInboxApp.js';
 import { BranchManagementApp } from './apps/BranchManagementApp/BranchManagementApp.js';
 import { EducationManagementApp } from './apps/EducationManagementApp/EducationManagementApp.js';
+import { SkillManagementApp } from './apps/SkillManagementApp/SkillManagementApp.js';
+import { RecruitmentManagementApp } from './apps/RecruitmentManagementApp/RecruitmentManagementApp.js';
 
 class App {
   constructor() {
@@ -91,6 +93,8 @@ class App {
     this.appManager.register(MessageInboxApp);
     this.appManager.register(BranchManagementApp);
     this.appManager.register(EducationManagementApp);
+    this.appManager.register(SkillManagementApp);
+    this.appManager.register(RecruitmentManagementApp);
 
     this.logger.info(`Registered ${this.appManager.getRegisteredClasses().length} MiniApps`);
   }
@@ -189,7 +193,9 @@ class App {
       'OrganizationApp': 'organization-container',
       'MessageInboxApp': 'inbox-container',
       'BranchManagementApp': 'branch-container',
-      'EducationManagementApp': 'education-container'
+      'EducationManagementApp': 'education-container',
+      'SkillManagementApp': 'skill-container',
+      'RecruitmentManagementApp': 'recruitment-container'
     };
     return selectorMap[className] || `${className.toLowerCase()}-container`;
   }

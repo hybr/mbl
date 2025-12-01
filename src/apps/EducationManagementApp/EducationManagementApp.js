@@ -1234,7 +1234,7 @@ class EducationManagementApp extends MiniApp {
           updatedAt: new Date().toISOString()
         };
 
-        await this.db.put(updated);
+        await this.db.update(updated);
         this.showSuccess('Education record updated successfully');
         this.emit('education:updated', updated);
 
@@ -1251,7 +1251,7 @@ class EducationManagementApp extends MiniApp {
           createdBy: this.currentUser._id
         };
 
-        await this.db.put(newRecord);
+        await this.db.create(newRecord);
         this.showSuccess('Education record created successfully');
         this.emit('education:created', newRecord);
       }

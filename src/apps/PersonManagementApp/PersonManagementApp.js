@@ -775,12 +775,18 @@ class PersonManagementApp extends MiniApp {
       onClick: () => this.openEducationApp()
     }, ['🎓 Education']);
 
+    const skillsBtn = this.createElement('button', {
+      className: 'btn btn-secondary',
+      onClick: () => this.openSkillsApp()
+    }, ['🛠️ Skills']);
+
     actions.appendChild(tasksBtn);
     actions.appendChild(notesBtn);
     actions.appendChild(messagesBtn);
     actions.appendChild(editBtn);
     actions.appendChild(logoutBtn);
     actions.appendChild(educationBtn);
+    actions.appendChild(skillsBtn);
 
     // Assemble
     profileCard.appendChild(avatarSection);
@@ -1395,6 +1401,22 @@ class PersonManagementApp extends MiniApp {
     } catch (error) {
       this.logger.error('Failed to open Education app:', error);
       this.showError('Failed to open Education app');
+    }
+  }
+
+  /**
+   * Open Skill Management App
+   */
+  async openSkillsApp() {
+    try {
+      if (window.app) {
+        await window.app.toggleMiniApp('SkillManagementApp', 'skill-container');
+      } else {
+        this.logger.warn('Global app instance not available');
+      }
+    } catch (error) {
+      this.logger.error('Failed to open Skills app:', error);
+      this.showError('Failed to open Skills app');
     }
   }
 

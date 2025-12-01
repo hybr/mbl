@@ -1,0 +1,2387 @@
+/**
+ * RecruitmentManagementApp.js
+ * Manages complete hiring lifecycle from vacancy creation to worker onboarding
+ */
+
+import { MiniApp } from '../../core/MiniApp.js';
+
+const STAGE_LABELS = {
+  initial_review: 'Initial Review',
+  screening: 'Screening',
+  interview: 'Interview',
+  offer: 'Offer',
+  onboarding: 'Onboarding'
+};
+
+const APPLICATION_STATUS_OPTIONS = [
+  'applied',
+  'screening',
+  'interview',
+  'offer',
+  'rejected',
+  'hired'
+];
+
+const STAGE_STATUS_OPTIONS = [
+  'pending',
+  'scheduled',
+  'in_progress',
+  'completed'
+];
+
+const DEFAULT_ONBOARDING_TASKS = [
+  { id: 'task-offer-acceptance', task: 'Offer Acceptance', status: 'pending' },
+  { id: 'task-background-check', task: 'Background Check', status: 'pending' },
+  { id: 'task-documentation', task: 'Document Collection', status: 'pending' },
+  { id: 'task-orientation', task: 'Orientation Scheduling', status: 'pending' }
+];
+
+class RecruitmentManagementApp extends MiniApp {
+  constructor(options = {}) {
+    super({
+      name: 'RecruitmentManagementApp',
+      ...options
+    });
+
+    // State
+    this.vacancies = [];
+    this.applications = [];
+    this.onboardings = [];
+    this.currentVacancy = null;
+    this.currentApplication = null;
+    this.currentUser = null;
+    this.defaultOrganization = null;
+
+    // Reference data
+    this.departments = [];
+    this.teams = [];
+    this.designations = [];
+    this.educationLevels = [];
+    this.subjects = [];
+    this.skills = [];
+    this.workstations = [];
+    this.organizations = [];
+
+    // View state
+    this.currentView = 'public-vacancies'; // public-vacancies, org-vacancies, create-vacancy, edit-vacancy, vacancy-details, apply, my-applications, manage-applications, onboarding
+    this.viewMode = 'public'; // public, org-admin, applicant
+    this.searchTerm = '';
+    this.filterStatus = 'all';
+    this.filterDepartment = 'all';
+    this.filterOrganization = 'all';
+
+    // Components
+    this.components = {};
+  }
+
+  /**
+   * Initialize the app
+   */
+  async onInit() {
+    try {
+      this.logger.info('Initializing RecruitmentManagementApp...');
+
+      // Create database indexes
+      await this.createIndexes();
+
+      // Subscribe to data changes
+      this.subscribeToData('vacancy', (change) => this.handleVacancyChange(change));
+      this.subscribeToData('application', (change) => this.handleApplicationChange(change));
+      this.subscribeToData('onboarding', (change) => this.handleOnboardingChange(change));
+
+      // Subscribe to person login/logout
+      this.subscribe('person:login', (user) => {
+        this.currentUser = user;
+        this.determineViewMode();
+        this.loadData();
+        if (this.isRendered) {
+          this.render();
+        }
+      });
+
+      this.subscribe('person:logout', () => {
+        this.currentUser = null;
+        this.viewMode = 'public';
+        this.vacancies = [];
+        this.applications = [];
+        if (this.isRendered) {
+          this.render();
+        }
+      });
+
+      // Subscribe to organization changes
+      this.subscribe('organization:defaultChanged', (org) => {
+        this.defaultOrganization = org;
+        if (this.isRendered) {
+          this.render();
+        }
+      });
+
+      // Load current user session
+      await this.checkCurrentUser();
+
+      // Load default organization
+      await this.loadDefaultOrganization();
+
+      // Load reference data
+      await this.loadReferenceData();
+
+      // Determine view mode
+      this.determineViewMode();
+
+      // Load data
+      await this.loadData();
+
+      this.logger.info('RecruitmentManagementApp initialized successfully');
+
+    } catch (error) {
+      this.logger.error('Failed to initialize RecruitmentManagementApp:', error);
+    }
+  }
+
+  /**
+   * Create database indexes
+   */
+  async createIndexes() {
+    try {
+      // Vacancy indexes
+      await this.db.createIndex(['type', 'organizationId']);
+      await this.db.createIndex(['type', 'organizationId', 'status']);
+      await this.db.createIndex(['type', 'status']);
+      await this.db.createIndex(['type', 'departmentCode']);
+
+      // Application indexes
+      await this.db.createIndex(['type', 'vacancyId']);
+      await this.db.createIndex(['type', 'applicantId']);
+      await this.db.createIndex(['type', 'organizationId']);
+      await this.db.createIndex(['type', 'organizationId', 'status']);
+
+      // Onboarding indexes
+      await this.db.createIndex(['type', 'applicationId']);
+      await this.db.createIndex(['type', 'organizationId']);
+
+      this.logger.info('Database indexes created');
+    } catch (error) {
+      this.logger.error('Failed to create indexes:', error);
+    }
+  }
+
+  /**
+   * Check for current logged-in user
+   */
+  async checkCurrentUser() {
+    try {
+      const sessionData = localStorage.getItem('personManagementApp_session');
+      if (sessionData) {
+        const session = JSON.parse(sessionData);
+        const result = await this.db.query({
+          selector: {
+            type: 'person',
+            _id: session.userId
+          }
+        });
+
+        if (result && result.length > 0) {
+          this.currentUser = result[0];
+          this.logger.info('Current user loaded:', this.currentUser.username);
+        }
+      }
+    } catch (error) {
+      this.logger.error('Failed to load current user:', error);
+    }
+  }
+
+  /**
+   * Load default organization
+   */
+  async loadDefaultOrganization() {
+    try {
+      const storedOrg = localStorage.getItem('defaultOrganization');
+      if (storedOrg) {
+        this.defaultOrganization = JSON.parse(storedOrg);
+      }
+    } catch (error) {
+      this.logger.error('Failed to load default organization:', error);
+    }
+  }
+
+  /**
+   * Determine view mode based on user and organization
+   */
+  determineViewMode() {
+    if (!this.currentUser) {
+      this.viewMode = 'public';
+      return;
+    }
+
+    // Check if user has organization (org admin)
+    if (this.defaultOrganization) {
+      this.viewMode = 'org-admin';
+    } else {
+      this.viewMode = 'applicant';
+    }
+  }
+
+  /**
+   * Load reference data from JSON files
+   */
+  async loadReferenceData() {
+    try {
+      // Load departments
+      try {
+        const deptResponse = await fetch('/data/department.json');
+        this.departments = await deptResponse.json();
+        this.logger.info(`Loaded ${this.departments.length} departments`);
+      } catch (e) {
+        this.departments = [];
+        this.logger.warn('Failed to load departments');
+      }
+
+      // Load teams
+      try {
+        const teamResponse = await fetch('/data/team.json');
+        this.teams = await teamResponse.json();
+        this.logger.info(`Loaded ${this.teams.length} teams`);
+      } catch (e) {
+        this.teams = [];
+        this.logger.warn('Failed to load teams');
+      }
+
+      // Load designations
+      try {
+        const desgResponse = await fetch('/data/designation.json');
+        this.designations = await desgResponse.json();
+        this.logger.info(`Loaded ${this.designations.length} designations`);
+      } catch (e) {
+        this.designations = [];
+        this.logger.warn('Failed to load designations');
+      }
+
+      // Load education levels
+      try {
+        const levelsResponse = await fetch('/data/education-levels.json');
+        this.educationLevels = await levelsResponse.json();
+        this.logger.info(`Loaded ${this.educationLevels.length} education levels`);
+      } catch (e) {
+        this.educationLevels = [];
+        this.logger.warn('Failed to load education levels');
+      }
+
+      // Load subjects
+      try {
+        const subjectsResponse = await fetch('/data/educational-subjects.json');
+        this.subjects = await subjectsResponse.json();
+        this.logger.info(`Loaded ${this.subjects.length} subjects`);
+      } catch (e) {
+        this.subjects = [];
+        this.logger.warn('Failed to load subjects');
+      }
+
+      // Load skills
+      try {
+        const skillsResponse = await fetch('/data/skills.json');
+        this.skills = await skillsResponse.json();
+        this.logger.info(`Loaded ${this.skills.length} skills`);
+      } catch (e) {
+        this.skills = [];
+        this.logger.warn('Failed to load skills');
+      }
+
+      // Load workstations from BranchManagementApp data
+      await this.loadWorkstations();
+
+      // Load organizations
+      await this.loadOrganizations();
+
+    } catch (error) {
+      this.logger.error('Failed to load reference data:', error);
+    }
+  }
+
+  /**
+   * Load workstations (branches)
+   */
+  async loadWorkstations() {
+    try {
+      const result = await this.db.query({
+        selector: { type: 'branch' }
+      });
+      this.workstations = result.docs || result;
+      this.logger.info(`Loaded ${this.workstations.length} workstations`);
+    } catch (error) {
+      this.workstations = [];
+      this.logger.warn('Failed to load workstations');
+    }
+  }
+
+  /**
+   * Load organizations
+   */
+  async loadOrganizations() {
+    try {
+      const result = await this.db.query({
+        selector: { type: 'organization' }
+      });
+      this.organizations = result.docs || result;
+      this.logger.info(`Loaded ${this.organizations.length} organizations`);
+    } catch (error) {
+      this.organizations = [];
+      this.logger.warn('Failed to load organizations');
+    }
+  }
+
+  /**
+   * Load all data based on view mode
+   */
+  async loadData() {
+    if (this.viewMode === 'public') {
+      await this.loadPublicVacancies();
+      this.onboardings = [];
+    } else if (this.viewMode === 'org-admin') {
+      await this.loadOrgVacancies();
+      await this.loadOrgApplications();
+      await this.loadOrgOnboardings();
+    } else if (this.viewMode === 'applicant') {
+      await this.loadPublicVacancies();
+      await this.loadMyApplications();
+      await this.loadMyOnboardings();
+    }
+  }
+
+  /**
+   * Load public vacancies (open status only)
+   */
+  async loadPublicVacancies() {
+    try {
+      const result = await this.db.query({
+        selector: {
+          type: 'vacancy',
+          status: 'open'
+        }
+      });
+      this.vacancies = result.docs || result;
+      this.logger.info(`Loaded ${this.vacancies.length} public vacancies`);
+      if (this.isRendered) {
+        this.render();
+      }
+    } catch (error) {
+      this.logger.error('Failed to load public vacancies:', error);
+      this.vacancies = [];
+    }
+  }
+
+  /**
+   * Load organization vacancies
+   */
+  async loadOrgVacancies() {
+    if (!this.defaultOrganization) {
+      this.vacancies = [];
+      return;
+    }
+
+    try {
+      const result = await this.db.query({
+        selector: {
+          type: 'vacancy',
+          organizationId: this.defaultOrganization._id
+        }
+      });
+      this.vacancies = result.docs || result;
+      this.logger.info(`Loaded ${this.vacancies.length} organization vacancies`);
+      if (this.isRendered) {
+        this.render();
+      }
+    } catch (error) {
+      this.logger.error('Failed to load organization vacancies:', error);
+      this.vacancies = [];
+    }
+  }
+
+  /**
+   * Load my applications
+   */
+  async loadMyApplications() {
+    if (!this.currentUser) {
+      this.applications = [];
+      return;
+    }
+
+    try {
+      const result = await this.db.query({
+        selector: {
+          type: 'application',
+          applicantId: this.currentUser._id
+        }
+      });
+      this.applications = result.docs || result;
+      this.logger.info(`Loaded ${this.applications.length} applications`);
+      if (this.isRendered) {
+        this.render();
+      }
+    } catch (error) {
+      this.logger.error('Failed to load applications:', error);
+      this.applications = [];
+    }
+  }
+
+  /**
+   * Load onboarding records for current user
+   */
+  async loadMyOnboardings() {
+    if (!this.currentUser) {
+      this.onboardings = [];
+      return;
+    }
+
+    try {
+      const result = await this.db.query({
+        selector: {
+          type: 'onboarding',
+          personId: this.currentUser._id
+        }
+      });
+      this.onboardings = result.docs || result;
+      this.logger.info(`Loaded ${this.onboardings.length} onboarding records for applicant`);
+    } catch (error) {
+      this.logger.error('Failed to load onboarding records:', error);
+      this.onboardings = [];
+    }
+  }
+
+  /**
+   * Load organization applications
+   */
+  async loadOrgApplications() {
+    if (!this.defaultOrganization) {
+      this.applications = [];
+      return;
+    }
+
+    try {
+      const result = await this.db.query({
+        selector: {
+          type: 'application',
+          organizationId: this.defaultOrganization._id
+        }
+      });
+      this.applications = result.docs || result;
+      this.logger.info(`Loaded ${this.applications.length} organization applications`);
+      if (this.isRendered) {
+        this.render();
+      }
+    } catch (error) {
+      this.logger.error('Failed to load organization applications:', error);
+      this.applications = [];
+    }
+  }
+
+  /**
+   * Load organization onboarding records
+   */
+  async loadOrgOnboardings() {
+    if (!this.defaultOrganization) {
+      this.onboardings = [];
+      return;
+    }
+
+    try {
+      const result = await this.db.query({
+        selector: {
+          type: 'onboarding',
+          organizationId: this.defaultOrganization._id
+        }
+      });
+      this.onboardings = result.docs || result;
+      this.logger.info(`Loaded ${this.onboardings.length} onboarding records`);
+    } catch (error) {
+      this.logger.error('Failed to load onboarding records:', error);
+      this.onboardings = [];
+    }
+  }
+
+  /**
+   * Handle vacancy changes
+   */
+  handleVacancyChange(change) {
+    if (change.deleted) {
+      this.vacancies = this.vacancies.filter(v => v._id !== change.id);
+    } else {
+      const index = this.vacancies.findIndex(v => v._id === change.doc._id);
+      if (index >= 0) {
+        this.vacancies[index] = change.doc;
+      } else {
+        // Only add if matches current filter
+        if (this.viewMode === 'public' && change.doc.status === 'open') {
+          this.vacancies.push(change.doc);
+        } else if (this.viewMode === 'org-admin' && change.doc.organizationId === this.defaultOrganization?._id) {
+          this.vacancies.push(change.doc);
+        }
+      }
+    }
+
+    if (this.isRendered && (this.currentView === 'public-vacancies' || this.currentView === 'org-vacancies')) {
+      this.render();
+    }
+  }
+
+  /**
+   * Handle application changes
+   */
+  handleApplicationChange(change) {
+    if (change.deleted) {
+      this.applications = this.applications.filter(a => a._id !== change.id);
+    } else {
+      const index = this.applications.findIndex(a => a._id === change.doc._id);
+      if (index >= 0) {
+        this.applications[index] = change.doc;
+      } else {
+        // Only add if matches current user/org
+        if (this.viewMode === 'applicant' && change.doc.applicantId === this.currentUser?._id) {
+          this.applications.push(change.doc);
+        } else if (this.viewMode === 'org-admin' && change.doc.organizationId === this.defaultOrganization?._id) {
+          this.applications.push(change.doc);
+        }
+      }
+    }
+
+    if (this.isRendered && (this.currentView === 'my-applications' || this.currentView === 'manage-applications')) {
+      this.render();
+    }
+  }
+
+  /**
+   * Handle onboarding changes
+   */
+  handleOnboardingChange(change) {
+    if (change.deleted) {
+      this.onboardings = this.onboardings.filter(o => o._id !== change.id);
+    } else {
+      const index = this.onboardings.findIndex(o => o._id === change.doc._id);
+      if (index >= 0) {
+        this.onboardings[index] = change.doc;
+      } else {
+        this.onboardings.push(change.doc);
+      }
+    }
+
+    if (this.isRendered && (this.currentView === 'onboarding' || this.currentView === 'application-details')) {
+      this.render();
+    }
+  }
+
+  /**
+   * Render the UI
+   */
+  async onRender() {
+    this.clearContainer();
+
+    switch (this.currentView) {
+      case 'public-vacancies':
+        this.renderPublicVacanciesView();
+        break;
+      case 'org-vacancies':
+        this.renderOrgVacanciesView();
+        break;
+      case 'create-vacancy':
+      case 'edit-vacancy':
+        this.renderVacancyFormView();
+        break;
+      case 'vacancy-details':
+        this.renderVacancyDetailsView();
+        break;
+      case 'apply':
+        this.renderApplicationFormView();
+        break;
+      case 'my-applications':
+        this.renderMyApplicationsView();
+        break;
+      case 'manage-applications':
+        this.renderManageApplicationsView();
+        break;
+      case 'application-details':
+        this.renderApplicationDetailsView();
+        break;
+      case 'onboarding':
+        this.renderOnboardingView();
+        break;
+      default:
+        this.renderPublicVacanciesView();
+    }
+  }
+
+  /**
+   * Render public vacancies view
+   */
+  renderPublicVacanciesView() {
+    const header = this.createElement('div', { className: 'miniapp-header' });
+    const title = this.createElement('h2', {}, ['Open Positions']);
+    header.appendChild(title);
+
+    // Search and filters
+    const filters = this.createElement('div', { className: 'vacancy-filters' });
+    
+    const searchGroup = this.createElement('div', { className: 'filter-group' });
+    const searchInput = this.createElement('input', {
+      type: 'text',
+      className: 'input',
+      placeholder: 'Search vacancies...',
+      value: this.searchTerm || '',
+      oninput: (e) => {
+        this.searchTerm = e.target.value;
+        this.render();
+      }
+    });
+    searchGroup.appendChild(searchInput);
+
+    const orgFilter = this.createElement('div', { className: 'filter-group' });
+    const orgSelect = this.createElement('select', {
+      className: 'input',
+      onchange: (e) => {
+        this.filterOrganization = e.target.value;
+        this.render();
+      }
+    });
+    const allOrgOption = this.createElement('option', { value: 'all' }, ['All Organizations']);
+    orgSelect.appendChild(allOrgOption);
+    this.organizations.forEach(org => {
+      const option = this.createElement('option', {
+        value: org._id,
+        selected: this.filterOrganization === org._id
+      }, [org.name || org._id]);
+      orgSelect.appendChild(option);
+    });
+    orgFilter.appendChild(orgSelect);
+
+    filters.appendChild(searchGroup);
+    filters.appendChild(orgFilter);
+
+    // Vacancy list
+    const listContainer = this.createElement('div', { className: 'vacancy-list-container' });
+
+    const filteredVacancies = this.getFilteredVacancies();
+
+    if (filteredVacancies.length === 0) {
+      const empty = this.createElement('div', { className: 'empty-state' }, [
+        'No open positions found.'
+      ]);
+      listContainer.appendChild(empty);
+    } else {
+      filteredVacancies.forEach(vacancy => {
+        listContainer.appendChild(this.renderVacancyCard(vacancy, true));
+      });
+    }
+
+    this.container.appendChild(header);
+    this.container.appendChild(filters);
+    this.container.appendChild(listContainer);
+  }
+
+  /**
+   * Render organization vacancies view
+   */
+  renderOrgVacanciesView() {
+    if (!this.defaultOrganization) {
+      const message = this.createElement('div', { className: 'info-message' }, [
+        'Please set a default organization to manage vacancies.'
+      ]);
+      this.container.appendChild(message);
+      return;
+    }
+
+    const header = this.createElement('div', { className: 'miniapp-header' });
+    const title = this.createElement('h2', {}, [`Vacancies - ${this.defaultOrganization.name}`]);
+    header.appendChild(title);
+
+    const actions = this.createElement('div', { className: 'vacancy-actions' });
+    const createBtn = this.createElement('button', {
+      className: 'btn btn-primary',
+      onclick: () => this.showCreateVacancyView()
+    }, ['+ Create Vacancy']);
+    actions.appendChild(createBtn);
+
+    // Filters
+    const filters = this.createElement('div', { className: 'vacancy-filters' });
+    const statusFilter = this.createElement('div', { className: 'filter-group' });
+    const statusSelect = this.createElement('select', {
+      className: 'input',
+      onchange: (e) => {
+        this.filterStatus = e.target.value;
+        this.render();
+      }
+    });
+    ['all', 'draft', 'open', 'closed', 'filled'].forEach(status => {
+      const option = this.createElement('option', {
+        value: status,
+        selected: this.filterStatus === status
+      }, [status.charAt(0).toUpperCase() + status.slice(1)]);
+      statusSelect.appendChild(option);
+    });
+    statusFilter.appendChild(statusSelect);
+    filters.appendChild(statusFilter);
+
+    // Vacancy list
+    const listContainer = this.createElement('div', { className: 'vacancy-list-container' });
+
+    const filteredVacancies = this.getFilteredOrgVacancies();
+
+    if (filteredVacancies.length === 0) {
+      const empty = this.createElement('div', { className: 'empty-state' }, [
+        'No vacancies found. Create your first vacancy!'
+      ]);
+      listContainer.appendChild(empty);
+    } else {
+      filteredVacancies.forEach(vacancy => {
+        listContainer.appendChild(this.renderVacancyCard(vacancy, false));
+      });
+    }
+
+    this.container.appendChild(header);
+    this.container.appendChild(actions);
+    this.container.appendChild(filters);
+    this.container.appendChild(listContainer);
+  }
+
+  /**
+   * Render vacancy card
+   */
+  renderVacancyCard(vacancy, isPublic = false) {
+    const card = this.createElement('div', { className: 'vacancy-card' });
+
+    const title = this.createElement('div', { className: 'vacancy-card-title' }, [
+      vacancy.title || 'Untitled Position'
+    ]);
+
+    const orgName = this.getOrganizationName(vacancy.organizationId);
+    const orgInfo = this.createElement('div', { className: 'vacancy-card-org' }, [orgName]);
+
+    const deptName = this.getDepartmentName(vacancy.departmentCode);
+    const deptInfo = this.createElement('div', { className: 'vacancy-card-dept' }, [
+      deptName || 'N/A'
+    ]);
+
+    const statusBadge = this.createElement('span', {
+      className: `status-badge status-${vacancy.status}`
+    }, [vacancy.status || 'draft']);
+
+    const details = this.createElement('div', { className: 'vacancy-card-details' });
+    if (vacancy.workExperienceYears) {
+      details.appendChild(this.createElement('div', {}, [
+        `Experience: ${vacancy.workExperienceYears} years`
+      ]));
+    }
+
+    const actions = this.createElement('div', { className: 'vacancy-card-actions' });
+
+    if (isPublic) {
+      const viewBtn = this.createElement('button', {
+        className: 'btn btn-small btn-primary',
+        onclick: () => this.showVacancyDetailsView(vacancy._id)
+      }, ['View Details']);
+      actions.appendChild(viewBtn);
+
+      if (this.currentUser) {
+        const hasApplied = this.applications.some(a => a.vacancyId === vacancy._id);
+        if (!hasApplied) {
+          const applyBtn = this.createElement('button', {
+            className: 'btn btn-small btn-secondary',
+            onclick: () => this.showApplicationFormView(vacancy._id)
+          }, ['Apply']);
+          actions.appendChild(applyBtn);
+        } else {
+          const appliedBadge = this.createElement('span', { className: 'applied-badge' }, ['Applied']);
+          actions.appendChild(appliedBadge);
+        }
+      }
+    } else {
+      const editBtn = this.createElement('button', {
+        className: 'btn btn-small btn-secondary',
+        onclick: () => this.showEditVacancyView(vacancy._id)
+      }, ['Edit']);
+      actions.appendChild(editBtn);
+
+      const appsBtn = this.createElement('button', {
+        className: 'btn btn-small btn-primary',
+        onclick: () => this.showManageApplicationsView(vacancy._id)
+      }, ['Applications']);
+      actions.appendChild(appsBtn);
+    }
+
+    card.appendChild(title);
+    card.appendChild(orgInfo);
+    card.appendChild(deptInfo);
+    card.appendChild(statusBadge);
+    card.appendChild(details);
+    card.appendChild(actions);
+
+    return card;
+  }
+
+  /**
+   * Get filtered vacancies for public view
+   */
+  getFilteredVacancies() {
+    let filtered = [...this.vacancies];
+
+    // Filter by organization
+    if (this.filterOrganization && this.filterOrganization !== 'all') {
+      filtered = filtered.filter(v => v.organizationId === this.filterOrganization);
+    }
+
+    // Filter by search term
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(v => {
+        const title = (v.title || '').toLowerCase();
+        const desc = (v.description || '').toLowerCase();
+        return title.includes(term) || desc.includes(term);
+      });
+    }
+
+    return filtered;
+  }
+
+  /**
+   * Get filtered vacancies for org view
+   */
+  getFilteredOrgVacancies() {
+    let filtered = [...this.vacancies];
+
+    // Filter by status
+    if (this.filterStatus && this.filterStatus !== 'all') {
+      filtered = filtered.filter(v => v.status === this.filterStatus);
+    }
+
+    return filtered;
+  }
+
+  /**
+   * Helper: Get organization name
+   */
+  getOrganizationName(orgId) {
+    const org = this.organizations.find(o => o._id === orgId);
+    return org ? org.name : orgId;
+  }
+
+  /**
+   * Helper: Get department name
+   */
+  getDepartmentName(code) {
+    const dept = this.departments.find(d => d.code === code);
+    return dept ? dept.name : code;
+  }
+
+  /**
+   * Helper: Get team name
+   */
+  getTeamName(code) {
+    const team = this.teams.find(t => t.code === code);
+    return team ? team.name : code;
+  }
+
+  /**
+   * Helper: Get designation name
+   */
+  getDesignationName(code) {
+    const desg = this.designations.find(d => d.code === code);
+    return desg ? desg.name : code;
+  }
+
+  /**
+   * Helper: Get skill name
+   */
+  getSkillName(code) {
+    const skill = this.skills.find(s => s.code === code);
+    return skill ? skill.name : code;
+  }
+
+  /**
+   * Helper: Get education level name
+   */
+  getEducationLevelName(code) {
+    const level = this.educationLevels.find(l => l.code === code);
+    return level ? level.name : code;
+  }
+
+  /**
+   * Helper: Get subject name
+   */
+  getSubjectName(code) {
+    const subject = this.subjects.find(s => s.code === code);
+    return subject ? subject.name : code;
+  }
+
+  /**
+   * Helper: Get stage label
+   */
+  getStageLabel(stage) {
+    if (!stage) return 'N/A';
+    return STAGE_LABELS[stage] || this.formatLabel(stage);
+  }
+
+  /**
+   * Helper: Format status/stage labels
+   */
+  formatLabel(value) {
+    if (!value) return 'N/A';
+    return value
+      .toString()
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+
+  /**
+   * Helper: Get onboarding status label
+   */
+  getOnboardingStatusLabel(status) {
+    if (!status) return 'Not Started';
+    return this.formatLabel(status);
+  }
+
+  /**
+   * Helper: Format datetime values
+   */
+  formatDateTime(value) {
+    if (!value) return '';
+    try {
+      return new Date(value).toLocaleString();
+    } catch (_) {
+      return value;
+    }
+  }
+
+  /**
+   * Helper: Get onboarding for application
+   */
+  getOnboardingForApplication(applicationId) {
+    if (!applicationId) return null;
+    return this.onboardings.find(o => o.applicationId === applicationId);
+  }
+
+  /**
+   * Show create vacancy view
+   */
+  showCreateVacancyView() {
+    this.currentVacancy = null;
+    this.currentView = 'create-vacancy';
+    this.render();
+  }
+
+  /**
+   * Show edit vacancy view
+   */
+  async showEditVacancyView(vacancyId) {
+    try {
+      this.currentVacancy = await this.db.read(vacancyId);
+      this.currentView = 'edit-vacancy';
+      this.render();
+    } catch (error) {
+      this.logger.error('Failed to load vacancy:', error);
+      this.showError('Failed to load vacancy');
+    }
+  }
+
+  /**
+   * Show vacancy details view
+   */
+  async showVacancyDetailsView(vacancyId) {
+    try {
+      this.currentVacancy = await this.db.read(vacancyId);
+      this.currentView = 'vacancy-details';
+      this.render();
+    } catch (error) {
+      this.logger.error('Failed to load vacancy:', error);
+      this.showError('Failed to load vacancy');
+    }
+  }
+
+  /**
+   * Show application form view
+   */
+  showApplicationFormView(vacancyId) {
+    if (!this.currentUser) {
+      this.showError('Please login to apply');
+      return;
+    }
+    this.currentVacancy = this.vacancies.find(v => v._id === vacancyId);
+    if (!this.currentVacancy) {
+      this.showError('Vacancy not found');
+      return;
+    }
+    this.currentView = 'apply';
+    this.render();
+  }
+
+  /**
+   * Show my applications view
+   */
+  showMyApplicationsView() {
+    this.currentView = 'my-applications';
+    this.render();
+  }
+
+  /**
+   * Show manage applications view
+   */
+  showManageApplicationsView(vacancyId = null) {
+    this.currentView = 'manage-applications';
+    if (vacancyId) {
+      this.currentVacancy = this.vacancies.find(v => v._id === vacancyId);
+    }
+    this.render();
+  }
+
+  /**
+   * Render vacancy form view (create/edit)
+   */
+  renderVacancyFormView() {
+    const isNew = !this.currentVacancy;
+
+    if (!this.defaultOrganization) {
+      const message = this.createElement('div', { className: 'info-message' }, [
+        'Please set a default organization to create vacancies.'
+      ]);
+      this.container.appendChild(message);
+      return;
+    }
+
+    const header = this.createElement('div', { className: 'miniapp-header' });
+    const title = this.createElement('h2', {}, [isNew ? 'Create Vacancy' : 'Edit Vacancy']);
+    const backBtn = this.createElement('button', {
+      className: 'btn btn-small',
+      onclick: () => {
+        this.currentView = 'org-vacancies';
+        this.render();
+      }
+    }, ['← Back']);
+    header.appendChild(backBtn);
+    header.appendChild(title);
+
+    const form = this.createElement('form', {
+      className: 'vacancy-form',
+      onsubmit: (e) => {
+        e.preventDefault();
+        this.saveVacancy();
+      }
+    });
+
+    // Title
+    const titleGroup = this.createElement('div', { className: 'form-group' });
+    titleGroup.appendChild(this.createElement('label', {}, ['Job Title *']));
+    const titleInput = this.createElement('input', {
+      type: 'text',
+      name: 'title',
+      className: 'input',
+      required: true,
+      value: this.currentVacancy ? this.currentVacancy.title : '',
+      placeholder: 'e.g. Senior Software Engineer'
+    });
+    titleGroup.appendChild(titleInput);
+
+    // Department
+    const deptGroup = this.createElement('div', { className: 'form-group' });
+    deptGroup.appendChild(this.createElement('label', {}, ['Department *']));
+    const deptSelect = this.createElement('select', {
+      name: 'departmentCode',
+      className: 'input',
+      required: true
+    });
+    const deptEmpty = this.createElement('option', { value: '' }, ['-- Select Department --']);
+    deptSelect.appendChild(deptEmpty);
+    this.departments.forEach(dept => {
+      const option = this.createElement('option', {
+        value: dept.code,
+        selected: this.currentVacancy && this.currentVacancy.departmentCode === dept.code
+      }, [dept.name]);
+      deptSelect.appendChild(option);
+    });
+    deptGroup.appendChild(deptSelect);
+
+    // Team
+    const teamGroup = this.createElement('div', { className: 'form-group' });
+    teamGroup.appendChild(this.createElement('label', {}, ['Team']));
+    const teamSelect = this.createElement('select', {
+      name: 'teamCode',
+      className: 'input'
+    });
+    const teamEmpty = this.createElement('option', { value: '' }, ['-- Select Team --']);
+    teamSelect.appendChild(teamEmpty);
+    this.teams.forEach(team => {
+      const option = this.createElement('option', {
+        value: team.code,
+        selected: this.currentVacancy && this.currentVacancy.teamCode === team.code
+      }, [team.name]);
+      teamSelect.appendChild(option);
+    });
+    teamGroup.appendChild(teamSelect);
+
+    // Designation
+    const desgGroup = this.createElement('div', { className: 'form-group' });
+    desgGroup.appendChild(this.createElement('label', {}, ['Designation *']));
+    const desgSelect = this.createElement('select', {
+      name: 'designationCode',
+      className: 'input',
+      required: true
+    });
+    const desgEmpty = this.createElement('option', { value: '' }, ['-- Select Designation --']);
+    desgSelect.appendChild(desgEmpty);
+    this.designations.forEach(desg => {
+      const option = this.createElement('option', {
+        value: desg.code,
+        selected: this.currentVacancy && this.currentVacancy.designationCode === desg.code
+      }, [desg.name]);
+      desgSelect.appendChild(option);
+    });
+    desgGroup.appendChild(desgSelect);
+
+    // Workstation
+    const workstationGroup = this.createElement('div', { className: 'form-group' });
+    workstationGroup.appendChild(this.createElement('label', {}, ['Workstation']));
+    const workstationSelect = this.createElement('select', {
+      name: 'workstationId',
+      className: 'input'
+    });
+    const workstationEmpty = this.createElement('option', { value: '' }, ['-- Select Workstation --']);
+    workstationSelect.appendChild(workstationEmpty);
+    this.workstations.forEach(ws => {
+      const option = this.createElement('option', {
+        value: ws._id,
+        selected: this.currentVacancy && this.currentVacancy.workstationId === ws._id
+      }, [ws.name || ws._id]);
+      workstationSelect.appendChild(option);
+    });
+    workstationGroup.appendChild(workstationSelect);
+
+    // Minimum Education Level
+    const eduLevelGroup = this.createElement('div', { className: 'form-group' });
+    eduLevelGroup.appendChild(this.createElement('label', {}, ['Minimum Education Level *']));
+    const eduLevelSelect = this.createElement('select', {
+      name: 'minimumEducationLevelCode',
+      className: 'input',
+      required: true
+    });
+    const eduLevelEmpty = this.createElement('option', { value: '' }, ['-- Select Level --']);
+    eduLevelSelect.appendChild(eduLevelEmpty);
+    this.educationLevels.forEach(level => {
+      const option = this.createElement('option', {
+        value: level.code,
+        selected: this.currentVacancy && this.currentVacancy.minimumEducationLevelCode === level.code
+      }, [level.name]);
+      eduLevelSelect.appendChild(option);
+    });
+    eduLevelGroup.appendChild(eduLevelSelect);
+
+    // Major Subjects (3 fields)
+    const subject1Group = this.createElement('div', { className: 'form-group' });
+    subject1Group.appendChild(this.createElement('label', {}, ['Major Subject 1 *']));
+    const subject1Select = this.createElement('select', {
+      name: 'majorSubjectOneCode',
+      className: 'input',
+      required: true
+    });
+    const subject1Empty = this.createElement('option', { value: '' }, ['-- Select Subject --']);
+    subject1Select.appendChild(subject1Empty);
+    this.subjects.forEach(subject => {
+      const option = this.createElement('option', {
+        value: subject.code,
+        selected: this.currentVacancy && this.currentVacancy.majorSubjectOneCode === subject.code
+      }, [subject.name]);
+      subject1Select.appendChild(option);
+    });
+    subject1Group.appendChild(subject1Select);
+
+    const subject2Group = this.createElement('div', { className: 'form-group' });
+    subject2Group.appendChild(this.createElement('label', {}, ['Major Subject 2']));
+    const subject2Select = this.createElement('select', {
+      name: 'majorSubjectTwoCode',
+      className: 'input'
+    });
+    const subject2Empty = this.createElement('option', { value: '' }, ['-- Select Subject --']);
+    subject2Select.appendChild(subject2Empty);
+    this.subjects.forEach(subject => {
+      const option = this.createElement('option', {
+        value: subject.code,
+        selected: this.currentVacancy && this.currentVacancy.majorSubjectTwoCode === subject.code
+      }, [subject.name]);
+      subject2Select.appendChild(option);
+    });
+    subject2Group.appendChild(subject2Select);
+
+    const subject3Group = this.createElement('div', { className: 'form-group' });
+    subject3Group.appendChild(this.createElement('label', {}, ['Major Subject 3']));
+    const subject3Select = this.createElement('select', {
+      name: 'majorSubjectThreeCode',
+      className: 'input'
+    });
+    const subject3Empty = this.createElement('option', { value: '' }, ['-- Select Subject --']);
+    subject3Select.appendChild(subject3Empty);
+    this.subjects.forEach(subject => {
+      const option = this.createElement('option', {
+        value: subject.code,
+        selected: this.currentVacancy && this.currentVacancy.majorSubjectThreeCode === subject.code
+      }, [subject.name]);
+      subject3Select.appendChild(option);
+    });
+    subject3Group.appendChild(subject3Select);
+
+    // Required Skills (3 fields)
+    const skill1Group = this.createElement('div', { className: 'form-group' });
+    skill1Group.appendChild(this.createElement('label', {}, ['Required Skill 1 *']));
+    const skill1Select = this.createElement('select', {
+      name: 'requiredSkillOneCode',
+      className: 'input',
+      required: true
+    });
+    const skill1Empty = this.createElement('option', { value: '' }, ['-- Select Skill --']);
+    skill1Select.appendChild(skill1Empty);
+    this.skills.forEach(skill => {
+      const option = this.createElement('option', {
+        value: skill.code,
+        selected: this.currentVacancy && this.currentVacancy.requiredSkillOneCode === skill.code
+      }, [skill.name]);
+      skill1Select.appendChild(option);
+    });
+    skill1Group.appendChild(skill1Select);
+
+    const skill2Group = this.createElement('div', { className: 'form-group' });
+    skill2Group.appendChild(this.createElement('label', {}, ['Required Skill 2 *']));
+    const skill2Select = this.createElement('select', {
+      name: 'requiredSkillTwoCode',
+      className: 'input',
+      required: true
+    });
+    const skill2Empty = this.createElement('option', { value: '' }, ['-- Select Skill --']);
+    skill2Select.appendChild(skill2Empty);
+    this.skills.forEach(skill => {
+      const option = this.createElement('option', {
+        value: skill.code,
+        selected: this.currentVacancy && this.currentVacancy.requiredSkillTwoCode === skill.code
+      }, [skill.name]);
+      skill2Select.appendChild(option);
+    });
+    skill2Group.appendChild(skill2Select);
+
+    const skill3Group = this.createElement('div', { className: 'form-group' });
+    skill3Group.appendChild(this.createElement('label', {}, ['Required Skill 3 *']));
+    const skill3Select = this.createElement('select', {
+      name: 'requiredSkillThreeCode',
+      className: 'input',
+      required: true
+    });
+    const skill3Empty = this.createElement('option', { value: '' }, ['-- Select Skill --']);
+    skill3Select.appendChild(skill3Empty);
+    this.skills.forEach(skill => {
+      const option = this.createElement('option', {
+        value: skill.code,
+        selected: this.currentVacancy && this.currentVacancy.requiredSkillThreeCode === skill.code
+      }, [skill.name]);
+      skill3Select.appendChild(option);
+    });
+    skill3Group.appendChild(skill3Select);
+
+    // Good to Have Skills (2 fields)
+    const goodSkill1Group = this.createElement('div', { className: 'form-group' });
+    goodSkill1Group.appendChild(this.createElement('label', {}, ['Good to Have Skill 1']));
+    const goodSkill1Select = this.createElement('select', {
+      name: 'goodToHaveSkillOneCode',
+      className: 'input'
+    });
+    const goodSkill1Empty = this.createElement('option', { value: '' }, ['-- Select Skill --']);
+    goodSkill1Select.appendChild(goodSkill1Empty);
+    this.skills.forEach(skill => {
+      const option = this.createElement('option', {
+        value: skill.code,
+        selected: this.currentVacancy && this.currentVacancy.goodToHaveSkillOneCode === skill.code
+      }, [skill.name]);
+      goodSkill1Select.appendChild(option);
+    });
+    goodSkill1Group.appendChild(goodSkill1Select);
+
+    const goodSkill2Group = this.createElement('div', { className: 'form-group' });
+    goodSkill2Group.appendChild(this.createElement('label', {}, ['Good to Have Skill 2']));
+    const goodSkill2Select = this.createElement('select', {
+      name: 'goodToHaveSkillTwoCode',
+      className: 'input'
+    });
+    const goodSkill2Empty = this.createElement('option', { value: '' }, ['-- Select Skill --']);
+    goodSkill2Select.appendChild(goodSkill2Empty);
+    this.skills.forEach(skill => {
+      const option = this.createElement('option', {
+        value: skill.code,
+        selected: this.currentVacancy && this.currentVacancy.goodToHaveSkillTwoCode === skill.code
+      }, [skill.name]);
+      goodSkill2Select.appendChild(option);
+    });
+    goodSkill2Group.appendChild(goodSkill2Select);
+
+    // Work Experience
+    const expGroup = this.createElement('div', { className: 'form-group' });
+    expGroup.appendChild(this.createElement('label', {}, ['Work Experience (Years) *']));
+    const expInput = this.createElement('input', {
+      type: 'number',
+      name: 'workExperienceYears',
+      className: 'input',
+      required: true,
+      min: '0',
+      value: this.currentVacancy ? this.currentVacancy.workExperienceYears : '0'
+    });
+    expGroup.appendChild(expInput);
+
+    // Description
+    const descGroup = this.createElement('div', { className: 'form-group' });
+    descGroup.appendChild(this.createElement('label', {}, ['Job Description']));
+    const descTextarea = this.createElement('textarea', {
+      name: 'description',
+      className: 'input',
+      rows: '5',
+      placeholder: 'Describe the position...'
+    }, [this.currentVacancy ? (this.currentVacancy.description || '') : '']);
+    descGroup.appendChild(descTextarea);
+
+    // Status
+    const statusGroup = this.createElement('div', { className: 'form-group' });
+    statusGroup.appendChild(this.createElement('label', {}, ['Status']));
+    const statusSelect = this.createElement('select', {
+      name: 'status',
+      className: 'input'
+    });
+    ['draft', 'open', 'closed', 'filled'].forEach(status => {
+      const option = this.createElement('option', {
+        value: status,
+        selected: this.currentVacancy && this.currentVacancy.status === status
+      }, [status.charAt(0).toUpperCase() + status.slice(1)]);
+      statusSelect.appendChild(option);
+    });
+    statusGroup.appendChild(statusSelect);
+
+    // Form actions
+    const formActions = this.createElement('div', { className: 'form-actions' });
+    const saveBtn = this.createElement('button', {
+      className: 'btn btn-primary',
+      type: 'submit'
+    }, [isNew ? 'Create Vacancy' : 'Update Vacancy']);
+    const cancelBtn = this.createElement('button', {
+      className: 'btn btn-secondary',
+      type: 'button',
+      onclick: () => {
+        this.currentView = 'org-vacancies';
+        this.render();
+      }
+    }, ['Cancel']);
+    formActions.appendChild(saveBtn);
+    formActions.appendChild(cancelBtn);
+
+    // Assemble form
+    form.appendChild(titleGroup);
+    form.appendChild(deptGroup);
+    form.appendChild(teamGroup);
+    form.appendChild(desgGroup);
+    form.appendChild(workstationGroup);
+    form.appendChild(eduLevelGroup);
+    form.appendChild(subject1Group);
+    form.appendChild(subject2Group);
+    form.appendChild(subject3Group);
+    form.appendChild(skill1Group);
+    form.appendChild(skill2Group);
+    form.appendChild(skill3Group);
+    form.appendChild(goodSkill1Group);
+    form.appendChild(goodSkill2Group);
+    form.appendChild(expGroup);
+    form.appendChild(descGroup);
+    form.appendChild(statusGroup);
+    form.appendChild(formActions);
+
+    this.container.appendChild(header);
+    this.container.appendChild(form);
+  }
+
+  /**
+   * Save vacancy
+   */
+  async saveVacancy() {
+    if (!this.defaultOrganization) {
+      this.showError('Organization required');
+      return;
+    }
+
+    const form = this.container.querySelector('.vacancy-form');
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    // Convert empty strings to null for optional fields
+    Object.keys(data).forEach(key => {
+      if (data[key] === '') {
+        data[key] = null;
+      }
+    });
+
+    try {
+      if (this.currentVacancy) {
+        // Update
+        const updated = {
+          ...this.currentVacancy,
+          ...data,
+          workExperienceYears: parseInt(data.workExperienceYears) || 0,
+          updatedAt: new Date().toISOString()
+        };
+        await this.db.update(updated);
+        this.showSuccess('Vacancy updated successfully');
+      } else {
+        // Create
+        const newVacancy = {
+          _id: `vacancy:${this.generateUUID()}`,
+          type: 'vacancy',
+          organizationId: this.defaultOrganization._id,
+          ...data,
+          workExperienceYears: parseInt(data.workExperienceYears) || 0,
+          createdBy: this.currentUser._id,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          publishedAt: data.status === 'open' ? new Date().toISOString() : null
+        };
+        await this.db.create(newVacancy);
+        this.showSuccess('Vacancy created successfully');
+      }
+
+      this.currentView = 'org-vacancies';
+      await this.loadOrgVacancies();
+      this.render();
+
+    } catch (error) {
+      this.logger.error('Failed to save vacancy:', error);
+      this.showError('Failed to save vacancy');
+    }
+  }
+
+  /**
+   * Render vacancy details view
+   */
+  renderVacancyDetailsView() {
+    if (!this.currentVacancy) {
+      this.showError('Vacancy not found');
+      return;
+    }
+
+    const header = this.createElement('div', { className: 'miniapp-header' });
+    const backBtn = this.createElement('button', {
+      className: 'btn btn-small',
+      onclick: () => {
+        this.currentView = 'public-vacancies';
+        this.render();
+      }
+    }, ['← Back']);
+    header.appendChild(backBtn);
+
+    const details = this.createElement('div', { className: 'vacancy-details' });
+
+    const title = this.createElement('h2', {}, [this.currentVacancy.title || 'Untitled Position']);
+    details.appendChild(title);
+
+    const orgName = this.getOrganizationName(this.currentVacancy.organizationId);
+    const orgInfo = this.createElement('div', { className: 'detail-row' }, [
+      `Organization: ${orgName}`
+    ]);
+    details.appendChild(orgInfo);
+
+    const deptName = this.getDepartmentName(this.currentVacancy.departmentCode);
+    const deptInfo = this.createElement('div', { className: 'detail-row' }, [
+      `Department: ${deptName}`
+    ]);
+    details.appendChild(deptInfo);
+
+    if (this.currentVacancy.teamCode) {
+      const teamName = this.getTeamName(this.currentVacancy.teamCode);
+      const teamInfo = this.createElement('div', { className: 'detail-row' }, [
+        `Team: ${teamName}`
+      ]);
+      details.appendChild(teamInfo);
+    }
+
+    const desgName = this.getDesignationName(this.currentVacancy.designationCode);
+    const desgInfo = this.createElement('div', { className: 'detail-row' }, [
+      `Designation: ${desgName}`
+    ]);
+    details.appendChild(desgInfo);
+
+    if (this.currentVacancy.workExperienceYears) {
+      const expInfo = this.createElement('div', { className: 'detail-row' }, [
+        `Experience Required: ${this.currentVacancy.workExperienceYears} years`
+      ]);
+      details.appendChild(expInfo);
+    }
+
+    const eduLevelName = this.getEducationLevelName(this.currentVacancy.minimumEducationLevelCode);
+    const eduInfo = this.createElement('div', { className: 'detail-row' }, [
+      `Minimum Education: ${eduLevelName}`
+    ]);
+    details.appendChild(eduInfo);
+
+    if (this.currentVacancy.description) {
+      const descSection = this.createElement('div', { className: 'detail-section' });
+      const descTitle = this.createElement('h3', {}, ['Description']);
+      const descText = this.createElement('div', { className: 'detail-text' }, [
+        this.currentVacancy.description
+      ]);
+      descSection.appendChild(descTitle);
+      descSection.appendChild(descText);
+      details.appendChild(descSection);
+    }
+
+    // Requirements section
+    const reqSection = this.createElement('div', { className: 'detail-section' });
+    const reqTitle = this.createElement('h3', {}, ['Requirements']);
+    reqSection.appendChild(reqTitle);
+
+    if (this.currentVacancy.majorSubjectOneCode) {
+      const subj1 = this.getSubjectName(this.currentVacancy.majorSubjectOneCode);
+      reqSection.appendChild(this.createElement('div', {}, [`Major Subject 1: ${subj1}`]));
+    }
+    if (this.currentVacancy.majorSubjectTwoCode) {
+      const subj2 = this.getSubjectName(this.currentVacancy.majorSubjectTwoCode);
+      reqSection.appendChild(this.createElement('div', {}, [`Major Subject 2: ${subj2}`]));
+    }
+    if (this.currentVacancy.majorSubjectThreeCode) {
+      const subj3 = this.getSubjectName(this.currentVacancy.majorSubjectThreeCode);
+      reqSection.appendChild(this.createElement('div', {}, [`Major Subject 3: ${subj3}`]));
+    }
+
+    if (this.currentVacancy.requiredSkillOneCode) {
+      const skill1 = this.getSkillName(this.currentVacancy.requiredSkillOneCode);
+      reqSection.appendChild(this.createElement('div', {}, [`Required Skill 1: ${skill1}`]));
+    }
+    if (this.currentVacancy.requiredSkillTwoCode) {
+      const skill2 = this.getSkillName(this.currentVacancy.requiredSkillTwoCode);
+      reqSection.appendChild(this.createElement('div', {}, [`Required Skill 2: ${skill2}`]));
+    }
+    if (this.currentVacancy.requiredSkillThreeCode) {
+      const skill3 = this.getSkillName(this.currentVacancy.requiredSkillThreeCode);
+      reqSection.appendChild(this.createElement('div', {}, [`Required Skill 3: ${skill3}`]));
+    }
+
+    if (this.currentVacancy.goodToHaveSkillOneCode) {
+      const gskill1 = this.getSkillName(this.currentVacancy.goodToHaveSkillOneCode);
+      reqSection.appendChild(this.createElement('div', {}, [`Good to Have Skill 1: ${gskill1}`]));
+    }
+    if (this.currentVacancy.goodToHaveSkillTwoCode) {
+      const gskill2 = this.getSkillName(this.currentVacancy.goodToHaveSkillTwoCode);
+      reqSection.appendChild(this.createElement('div', {}, [`Good to Have Skill 2: ${gskill2}`]));
+    }
+
+    details.appendChild(reqSection);
+
+    // Actions
+    const actions = this.createElement('div', { className: 'vacancy-details-actions' });
+    if (this.currentUser) {
+      const hasApplied = this.applications.some(a => a.vacancyId === this.currentVacancy._id);
+      if (!hasApplied) {
+        const applyBtn = this.createElement('button', {
+          className: 'btn btn-primary',
+          onclick: () => this.showApplicationFormView(this.currentVacancy._id)
+        }, ['Apply Now']);
+        actions.appendChild(applyBtn);
+      } else {
+        const appliedBadge = this.createElement('div', { className: 'applied-badge' }, [
+          'You have already applied'
+        ]);
+        actions.appendChild(appliedBadge);
+      }
+    } else {
+      const loginMsg = this.createElement('div', { className: 'info-message' }, [
+        'Please login to apply'
+      ]);
+      actions.appendChild(loginMsg);
+    }
+
+    this.container.appendChild(header);
+    this.container.appendChild(details);
+    this.container.appendChild(actions);
+  }
+
+  /**
+   * Render application form view
+   */
+  renderApplicationFormView() {
+    if (!this.currentUser) {
+      this.showError('Please login to apply');
+      return;
+    }
+
+    if (!this.currentVacancy) {
+      this.showError('Vacancy not found');
+      return;
+    }
+
+    const header = this.createElement('div', { className: 'miniapp-header' });
+    const title = this.createElement('h2', {}, ['Apply for Position']);
+    const backBtn = this.createElement('button', {
+      className: 'btn btn-small',
+      onclick: () => {
+        this.currentView = 'vacancy-details';
+        this.render();
+      }
+    }, ['← Back']);
+    header.appendChild(backBtn);
+    header.appendChild(title);
+
+    const form = this.createElement('form', {
+      className: 'application-form',
+      onsubmit: (e) => {
+        e.preventDefault();
+        this.submitApplication();
+      }
+    });
+
+    const vacancyInfo = this.createElement('div', { className: 'application-vacancy-info' }, [
+      `Position: ${this.currentVacancy.title || 'Untitled'}`
+    ]);
+    form.appendChild(vacancyInfo);
+
+    const coverLetterGroup = this.createElement('div', { className: 'form-group' });
+    coverLetterGroup.appendChild(this.createElement('label', {}, ['Cover Letter']));
+    const coverLetterTextarea = this.createElement('textarea', {
+      name: 'coverLetter',
+      className: 'input',
+      rows: '8',
+      placeholder: 'Tell us why you are a good fit for this position...'
+    });
+    coverLetterGroup.appendChild(coverLetterTextarea);
+    form.appendChild(coverLetterGroup);
+
+    const formActions = this.createElement('div', { className: 'form-actions' });
+    const submitBtn = this.createElement('button', {
+      className: 'btn btn-primary',
+      type: 'submit'
+    }, ['Submit Application']);
+    const cancelBtn = this.createElement('button', {
+      className: 'btn btn-secondary',
+      type: 'button',
+      onclick: () => {
+        this.currentView = 'vacancy-details';
+        this.render();
+      }
+    }, ['Cancel']);
+    formActions.appendChild(submitBtn);
+    formActions.appendChild(cancelBtn);
+    form.appendChild(formActions);
+
+    this.container.appendChild(header);
+    this.container.appendChild(form);
+  }
+
+  /**
+   * Submit application
+   */
+  async submitApplication() {
+    if (!this.currentUser || !this.currentVacancy) {
+      this.showError('Invalid application');
+      return;
+    }
+
+    // Check if already applied
+    const existingApp = this.applications.find(a => 
+      a.vacancyId === this.currentVacancy._id && 
+      a.applicantId === this.currentUser._id
+    );
+
+    if (existingApp) {
+      this.showError('You have already applied for this position');
+      return;
+    }
+
+    const form = this.container.querySelector('.application-form');
+    const formData = new FormData(form);
+    const coverLetter = formData.get('coverLetter') || '';
+
+    try {
+      const newApplication = {
+        _id: `application:${this.generateUUID()}`,
+        type: 'application',
+        vacancyId: this.currentVacancy._id,
+        applicantId: this.currentUser._id,
+        organizationId: this.currentVacancy.organizationId,
+        status: 'applied',
+        appliedAt: new Date().toISOString(),
+        currentStage: 'initial_review',
+        stages: [{
+          stage: 'initial_review',
+          status: 'pending',
+          notes: ''
+        }],
+        coverLetter: coverLetter,
+        interviewNotes: [],
+        offerDetails: null,
+        onboardingId: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      await this.db.create(newApplication);
+      this.showSuccess('Application submitted successfully!');
+
+      // Reload applications
+      await this.loadMyApplications();
+
+      // Go to my applications view
+      this.currentView = 'my-applications';
+      this.render();
+
+    } catch (error) {
+      this.logger.error('Failed to submit application:', error);
+      this.showError('Failed to submit application');
+    }
+  }
+
+  /**
+   * Render my applications view
+   */
+  renderMyApplicationsView() {
+    if (!this.currentUser) {
+      const message = this.createElement('div', { className: 'info-message' }, [
+        'Please login to view your applications.'
+      ]);
+      this.container.appendChild(message);
+      return;
+    }
+
+    const header = this.createElement('div', { className: 'miniapp-header' });
+    const title = this.createElement('h2', {}, ['My Applications']);
+    header.appendChild(title);
+
+    const listContainer = this.createElement('div', { className: 'application-list-container' });
+
+    if (this.applications.length === 0) {
+      const empty = this.createElement('div', { className: 'empty-state' }, [
+        'You have not applied to any positions yet.'
+      ]);
+      listContainer.appendChild(empty);
+    } else {
+      this.applications.forEach(application => {
+        listContainer.appendChild(this.renderApplicationCard(application, true));
+      });
+    }
+
+    this.container.appendChild(header);
+    this.container.appendChild(listContainer);
+  }
+
+  /**
+   * Render application card
+   */
+  renderApplicationCard(application, isApplicant = false) {
+    const card = this.createElement('div', { className: 'application-card' });
+
+    // Get vacancy info
+    const vacancy = this.vacancies.find(v => v._id === application.vacancyId);
+    const vacancyTitle = vacancy ? vacancy.title : 'Unknown Position';
+
+    const title = this.createElement('div', { className: 'application-card-title' }, [vacancyTitle]);
+
+    const statusBadge = this.createElement('span', {
+      className: `status-badge status-${application.status}`
+    }, [application.status || 'applied']);
+
+    const appliedDate = new Date(application.appliedAt).toLocaleDateString();
+    const dateInfo = this.createElement('div', { className: 'application-card-date' }, [
+      `Applied: ${appliedDate}`
+    ]);
+
+    const stageInfo = this.createElement('div', { className: 'application-card-stage' }, [
+      `Stage: ${this.getStageLabel(application.currentStage || 'initial_review')}`
+    ]);
+
+    card.appendChild(title);
+    card.appendChild(statusBadge);
+    card.appendChild(dateInfo);
+    card.appendChild(stageInfo);
+
+    if (application.onboardingId) {
+      const onboarding = this.onboardings.find(o => o._id === application.onboardingId);
+      const onboardingStatus = onboarding ? onboarding.status : 'in_progress';
+      const onboardingInfo = this.createElement('div', { className: 'application-card-onboarding' }, [
+        `Onboarding: ${this.getOnboardingStatusLabel(onboardingStatus)}`
+      ]);
+      card.appendChild(onboardingInfo);
+    }
+
+    if (!isApplicant) {
+      // Org admin view - show applicant name
+      const applicant = this.organizations.find(o => o._id === application.applicantId);
+      // Note: Would need to load person data to show name
+      const applicantInfo = this.createElement('div', { className: 'application-card-applicant' }, [
+        `Applicant: ${application.applicantId}`
+      ]);
+      card.appendChild(applicantInfo);
+
+      const actions = this.createElement('div', { className: 'application-card-actions' });
+      const viewBtn = this.createElement('button', {
+        className: 'btn btn-small btn-primary',
+        onclick: () => this.showApplicationDetailsView(application._id)
+      }, ['View Details']);
+      actions.appendChild(viewBtn);
+      card.appendChild(actions);
+    }
+
+    return card;
+  }
+
+  /**
+   * Render manage applications view
+   */
+  renderManageApplicationsView() {
+    if (!this.defaultOrganization) {
+      const message = this.createElement('div', { className: 'info-message' }, [
+        'Please set a default organization to manage applications.'
+      ]);
+      this.container.appendChild(message);
+      return;
+    }
+
+    const header = this.createElement('div', { className: 'miniapp-header' });
+    const title = this.createElement('h2', {}, ['Manage Applications']);
+    header.appendChild(title);
+
+    const headerActions = this.createElement('div', { className: 'header-actions' });
+    const onboardingBtn = this.createElement('button', {
+      className: 'btn btn-secondary btn-small',
+      onclick: () => {
+        this.currentView = 'onboarding';
+        this.render();
+      }
+    }, ['View Onboarding']);
+    headerActions.appendChild(onboardingBtn);
+    header.appendChild(headerActions);
+
+    // Filter by vacancy if specified
+    let filteredApplications = [...this.applications];
+    if (this.currentVacancy) {
+      filteredApplications = filteredApplications.filter(a => a.vacancyId === this.currentVacancy._id);
+    }
+
+    const listContainer = this.createElement('div', { className: 'application-list-container' });
+
+    if (filteredApplications.length === 0) {
+      const empty = this.createElement('div', { className: 'empty-state' }, [
+        'No applications found.'
+      ]);
+      listContainer.appendChild(empty);
+    } else {
+      filteredApplications.forEach(application => {
+        listContainer.appendChild(this.renderApplicationCard(application, false));
+      });
+    }
+
+    this.container.appendChild(header);
+    this.container.appendChild(listContainer);
+  }
+
+  /**
+   * Render application details view with workflow controls
+   */
+  renderApplicationDetailsView() {
+    if (!this.currentApplication) {
+      this.showError('Application not found');
+      return;
+    }
+
+    const application = this.currentApplication;
+    const vacancy = this.vacancies.find(v => v._id === application.vacancyId);
+    const applicantDisplay = application.applicantId || 'Unknown applicant';
+
+    const header = this.createElement('div', { className: 'miniapp-header' });
+    const backBtn = this.createElement('button', {
+      className: 'btn btn-small',
+      onclick: () => {
+        this.currentView = this.viewMode === 'org-admin' ? 'manage-applications' : 'my-applications';
+        this.render();
+      }
+    }, ['← Back']);
+    header.appendChild(backBtn);
+
+    const title = this.createElement('h2', {}, ['Application Details']);
+    header.appendChild(title);
+
+    // Info card
+    const infoCard = this.createElement('div', { className: 'application-details-card' });
+    infoCard.appendChild(this.createElement('div', { className: 'detail-row' }, [
+      `Position: ${vacancy ? vacancy.title : 'Unknown Position'}`
+    ]));
+    infoCard.appendChild(this.createElement('div', { className: 'detail-row' }, [
+      `Applicant: ${applicantDisplay}`
+    ]));
+    infoCard.appendChild(this.createElement('div', { className: 'detail-row' }, [
+      `Status: ${this.formatLabel(application.status)}`
+    ]));
+    infoCard.appendChild(this.createElement('div', { className: 'detail-row' }, [
+      `Current Stage: ${this.getStageLabel(application.currentStage)}`
+    ]));
+    infoCard.appendChild(this.createElement('div', { className: 'detail-row' }, [
+      `Applied: ${this.formatDateTime(application.appliedAt)}`
+    ]));
+
+    if (application.coverLetter) {
+      const coverSection = this.createElement('div', { className: 'detail-section' });
+      coverSection.appendChild(this.createElement('h3', {}, ['Cover Letter']));
+      coverSection.appendChild(this.createElement('div', { className: 'detail-text' }, [
+        application.coverLetter
+      ]));
+      infoCard.appendChild(coverSection);
+    }
+
+    // Stage timeline
+    const timelineSection = this.createElement('div', { className: 'stage-timeline' });
+    const timelineTitle = this.createElement('h3', {}, ['Stage History']);
+    timelineSection.appendChild(timelineTitle);
+
+    if (application.stages && application.stages.length > 0) {
+      application.stages
+        .sort((a, b) => new Date(a.updatedAt || a.scheduledAt || 0) - new Date(b.updatedAt || b.scheduledAt || 0))
+        .forEach(stage => {
+          const entry = this.createElement('div', { className: 'stage-entry' });
+          entry.appendChild(this.createElement('div', { className: 'stage-entry-title' }, [
+            `${this.getStageLabel(stage.stage)} - ${this.formatLabel(stage.status)}`
+          ]));
+          entry.appendChild(this.createElement('div', { className: 'stage-entry-date' }, [
+            this.formatDateTime(stage.updatedAt || stage.scheduledAt)
+          ]));
+          if (stage.notes) {
+            entry.appendChild(this.createElement('div', { className: 'stage-entry-notes' }, [stage.notes]));
+          }
+          timelineSection.appendChild(entry);
+        });
+    } else {
+      timelineSection.appendChild(this.createElement('div', { className: 'info-message' }, [
+        'No workflow updates yet.'
+      ]));
+    }
+
+    this.container.appendChild(header);
+    this.container.appendChild(infoCard);
+    this.container.appendChild(timelineSection);
+
+    // Workflow form for org admins
+    if (this.viewMode === 'org-admin') {
+      const workflowForm = this.createElement('form', {
+        className: 'application-workflow-form',
+        onsubmit: (e) => {
+          e.preventDefault();
+          this.updateApplicationWorkflow(e.currentTarget);
+        }
+      });
+
+      const statusGroup = this.createElement('div', { className: 'form-group' });
+      statusGroup.appendChild(this.createElement('label', {}, ['Application Status']));
+      const statusSelect = this.createElement('select', {
+        name: 'status',
+        className: 'input'
+      });
+      APPLICATION_STATUS_OPTIONS.forEach(status => {
+        const option = this.createElement('option', {
+          value: status,
+          selected: application.status === status
+        }, [this.formatLabel(status)]);
+        statusSelect.appendChild(option);
+      });
+      statusGroup.appendChild(statusSelect);
+
+      const stageGroup = this.createElement('div', { className: 'form-group' });
+      stageGroup.appendChild(this.createElement('label', {}, ['Workflow Stage']));
+      const stageSelect = this.createElement('select', {
+        name: 'stage',
+        className: 'input'
+      });
+      Object.keys(STAGE_LABELS).forEach(stage => {
+        const option = this.createElement('option', {
+          value: stage,
+          selected: application.currentStage === stage
+        }, [this.getStageLabel(stage)]);
+        stageSelect.appendChild(option);
+      });
+      stageGroup.appendChild(stageSelect);
+
+      const stageStatusGroup = this.createElement('div', { className: 'form-group' });
+      stageStatusGroup.appendChild(this.createElement('label', {}, ['Stage Status']));
+      const stageStatusSelect = this.createElement('select', {
+        name: 'stageStatus',
+        className: 'input'
+      });
+      STAGE_STATUS_OPTIONS.forEach(status => {
+        const option = this.createElement('option', {
+          value: status
+        }, [this.formatLabel(status)]);
+        stageStatusSelect.appendChild(option);
+      });
+      stageStatusGroup.appendChild(stageStatusSelect);
+
+      const scheduleGroup = this.createElement('div', { className: 'form-group' });
+      scheduleGroup.appendChild(this.createElement('label', {}, ['Schedule / Due Date']));
+      const scheduleInput = this.createElement('input', {
+        type: 'datetime-local',
+        name: 'scheduledAt',
+        className: 'input'
+      });
+      scheduleGroup.appendChild(scheduleInput);
+
+      const notesGroup = this.createElement('div', { className: 'form-group' });
+      notesGroup.appendChild(this.createElement('label', {}, ['Notes']));
+      const notesInput = this.createElement('textarea', {
+        name: 'notes',
+        className: 'input',
+        rows: '4',
+        placeholder: 'Add notes or interview information...'
+      });
+      notesGroup.appendChild(notesInput);
+
+      const formActions = this.createElement('div', { className: 'form-actions' });
+      const updateBtn = this.createElement('button', {
+        className: 'btn btn-primary',
+        type: 'submit'
+      }, ['Update Application']);
+      formActions.appendChild(updateBtn);
+
+      workflowForm.appendChild(statusGroup);
+      workflowForm.appendChild(stageGroup);
+      workflowForm.appendChild(stageStatusGroup);
+      workflowForm.appendChild(scheduleGroup);
+      workflowForm.appendChild(notesGroup);
+      workflowForm.appendChild(formActions);
+
+      this.container.appendChild(workflowForm);
+    }
+
+    const onboardingSection = this.renderOnboardingSection(application);
+    if (onboardingSection) {
+      this.container.appendChild(onboardingSection);
+    }
+  }
+
+  /**
+   * Show application details view
+   */
+  async showApplicationDetailsView(applicationId) {
+    try {
+      this.currentApplication = await this.db.read(applicationId);
+      if (this.currentApplication.onboardingId) {
+        const hasOnboarding = this.onboardings.find(o => o._id === this.currentApplication.onboardingId);
+        if (!hasOnboarding) {
+          if (this.viewMode === 'org-admin') {
+            await this.loadOrgOnboardings();
+          } else {
+            await this.loadMyOnboardings();
+          }
+        }
+      }
+      this.currentView = 'application-details';
+      this.render();
+    } catch (error) {
+      this.logger.error('Failed to load application:', error);
+      this.showError('Failed to load application');
+    }
+  }
+
+  /**
+   * Update application workflow and status
+   */
+  async updateApplicationWorkflow(formElement) {
+    if (!this.currentApplication) {
+      this.showError('Application not found');
+      return;
+    }
+
+    const formData = new FormData(formElement);
+    const status = formData.get('status') || this.currentApplication.status;
+    const stage = formData.get('stage') || this.currentApplication.currentStage || 'initial_review';
+    const stageStatus = formData.get('stageStatus') || 'pending';
+    const scheduledAt = formData.get('scheduledAt');
+    const notes = formData.get('notes') || '';
+    const now = new Date().toISOString();
+
+    const updatedApplication = {
+      ...this.currentApplication,
+      status,
+      currentStage: stage,
+      updatedAt: now,
+      stages: [...(this.currentApplication.stages || []), {
+        id: `stage:${this.generateUUID()}`,
+        stage,
+        status: stageStatus,
+        notes: notes.trim(),
+        scheduledAt: scheduledAt ? new Date(scheduledAt).toISOString() : null,
+        updatedAt: now
+      }]
+    };
+
+    try {
+      await this.db.update(updatedApplication);
+      this.currentApplication = updatedApplication;
+      await this.loadOrgApplications();
+      this.showSuccess('Application updated successfully');
+      this.render();
+    } catch (error) {
+      this.logger.error('Failed to update application:', error);
+      this.showError('Failed to update application');
+    }
+  }
+
+  /**
+   * Render onboarding section inside application details
+   */
+  renderOnboardingSection(application) {
+    if (!application) return null;
+
+    const section = this.createElement('div', { className: 'onboarding-section' });
+    section.appendChild(this.createElement('h3', {}, ['Onboarding']));
+
+    const onboarding = this.getOnboardingForApplication(application._id);
+
+    if (!onboarding) {
+      const message = this.createElement('div', { className: 'info-message' }, [
+        application.status === 'hired'
+          ? 'Onboarding has not started yet.'
+          : 'Set status to Hired to enable onboarding.'
+      ]);
+      section.appendChild(message);
+
+      if (this.viewMode === 'org-admin' && application.status === 'hired') {
+        const startBtn = this.createElement('button', {
+          className: 'btn btn-primary',
+          onclick: () => this.createOnboardingForApplication(application)
+        }, ['Start Onboarding']);
+        section.appendChild(startBtn);
+      }
+
+      return section;
+    }
+
+    section.appendChild(this.renderOnboardingCard(onboarding, this.viewMode === 'org-admin'));
+    return section;
+  }
+
+  /**
+   * Create onboarding record for application
+   */
+  async createOnboardingForApplication(application) {
+    if (!application) return;
+
+    const now = new Date().toISOString();
+    const newOnboarding = {
+      _id: `onboarding:${this.generateUUID()}`,
+      type: 'onboarding',
+      applicationId: application._id,
+      vacancyId: application.vacancyId,
+      personId: application.applicantId,
+      organizationId: application.organizationId,
+      status: 'not_started',
+      startDate: now,
+      completionDate: null,
+      tasks: DEFAULT_ONBOARDING_TASKS.map(task => ({
+        ...task,
+        updatedAt: now
+      })),
+      createdAt: now,
+      updatedAt: now
+    };
+
+    try {
+      await this.db.create(newOnboarding);
+      const updatedApplication = {
+        ...application,
+        onboardingId: newOnboarding._id,
+        currentStage: 'onboarding',
+        status: 'hired',
+        updatedAt: now,
+        stages: [...(application.stages || []), {
+          id: `stage:${this.generateUUID()}`,
+          stage: 'onboarding',
+          status: 'pending',
+          notes: 'Onboarding initiated',
+          updatedAt: now
+        }]
+      };
+
+      await this.db.update(updatedApplication);
+      this.currentApplication = updatedApplication;
+
+      if (this.viewMode === 'org-admin') {
+        await this.loadOrgOnboardings();
+        await this.loadOrgApplications();
+      } else {
+        await this.loadMyOnboardings();
+        await this.loadMyApplications();
+      }
+
+      this.showSuccess('Onboarding started');
+      this.render();
+    } catch (error) {
+      this.logger.error('Failed to create onboarding:', error);
+      this.showError('Failed to start onboarding');
+    }
+  }
+
+  /**
+   * Update onboarding task status
+   */
+  async updateOnboardingTaskStatus(onboardingId, taskId, newStatus) {
+    try {
+      const onboarding = await this.db.read(onboardingId);
+      const now = new Date().toISOString();
+      onboarding.tasks = (onboarding.tasks || []).map(task => {
+        if (task.id === taskId) {
+          const updatedTask = {
+            ...task,
+            status: newStatus,
+            updatedAt: now
+          };
+          if (newStatus === 'completed') {
+            updatedTask.completedAt = now;
+          } else {
+            delete updatedTask.completedAt;
+          }
+          return updatedTask;
+        }
+        return task;
+      });
+
+      const allCompleted = onboarding.tasks.every(task => task.status === 'completed');
+      const anyInProgress = onboarding.tasks.some(task => task.status === 'in_progress' || task.status === 'completed');
+
+      onboarding.status = allCompleted
+        ? 'completed'
+        : anyInProgress
+          ? 'in_progress'
+          : 'not_started';
+      onboarding.updatedAt = now;
+      onboarding.completionDate = allCompleted ? now : null;
+
+      await this.db.update(onboarding);
+
+      if (this.viewMode === 'org-admin') {
+        await this.loadOrgOnboardings();
+      } else {
+        await this.loadMyOnboardings();
+      }
+
+      this.showSuccess('Onboarding task updated');
+      if (this.currentView === 'application-details' || this.currentView === 'onboarding') {
+        this.render();
+      }
+    } catch (error) {
+      this.logger.error('Failed to update onboarding task:', error);
+      this.showError('Failed to update onboarding task');
+    }
+  }
+
+  /**
+   * Render onboarding overview view
+   */
+  renderOnboardingView() {
+    const header = this.createElement('div', { className: 'miniapp-header' });
+    const title = this.createElement('h2', {}, ['Onboarding']);
+    const backBtn = this.createElement('button', {
+      className: 'btn btn-small',
+      onclick: () => {
+        this.currentView = this.viewMode === 'org-admin' ? 'manage-applications' : 'my-applications';
+        this.render();
+      }
+    }, ['← Back']);
+    header.appendChild(backBtn);
+    header.appendChild(title);
+
+    const listContainer = this.createElement('div', { className: 'onboarding-list-container' });
+    const records = this.onboardings || [];
+
+    if (records.length === 0) {
+      const empty = this.createElement('div', { className: 'empty-state' }, [
+        this.viewMode === 'org-admin'
+          ? 'No onboarding records for this organization.'
+          : 'You do not have any onboarding tasks yet.'
+      ]);
+      listContainer.appendChild(empty);
+    } else {
+      records.forEach(onboarding => {
+        listContainer.appendChild(this.renderOnboardingCard(onboarding, this.viewMode === 'org-admin'));
+      });
+    }
+
+    this.container.appendChild(header);
+    this.container.appendChild(listContainer);
+  }
+
+  /**
+   * Render onboarding card
+   */
+  renderOnboardingCard(onboarding, allowUpdates = false) {
+    const card = this.createElement('div', { className: 'onboarding-card' });
+    const vacancy = this.vacancies.find(v => v._id === onboarding.vacancyId);
+
+    const title = this.createElement('div', { className: 'onboarding-card-title' }, [
+      vacancy ? vacancy.title : 'Onboarding'
+    ]);
+    card.appendChild(title);
+
+    const statusBadge = this.createElement('span', {
+      className: `status-badge status-${onboarding.status || 'not_started'}`
+    }, [this.getOnboardingStatusLabel(onboarding.status || 'not_started')]);
+    card.appendChild(statusBadge);
+
+    const tasksList = this.createElement('div', { className: 'onboarding-task-list' });
+
+    (onboarding.tasks || []).forEach(task => {
+      const taskRow = this.createElement('div', { className: 'onboarding-task-row' });
+      const name = this.createElement('div', { className: 'onboarding-task-name' }, [task.task]);
+      taskRow.appendChild(name);
+
+      if (allowUpdates) {
+        const select = this.createElement('select', {
+          className: 'input onboarding-task-select',
+          onchange: (e) => this.updateOnboardingTaskStatus(onboarding._id, task.id, e.target.value)
+        });
+        STAGE_STATUS_OPTIONS.filter(status => status !== 'scheduled').forEach(status => {
+          const option = this.createElement('option', {
+            value: status,
+            selected: task.status === status
+          }, [this.formatLabel(status)]);
+          select.appendChild(option);
+        });
+        taskRow.appendChild(select);
+      } else {
+        taskRow.appendChild(this.createElement('div', { className: 'onboarding-task-status' }, [
+          this.formatLabel(task.status)
+        ]));
+      }
+
+      tasksList.appendChild(taskRow);
+    });
+
+    card.appendChild(tasksList);
+
+    if (onboarding.status === 'completed' && onboarding.completionDate) {
+      card.appendChild(this.createElement('div', { className: 'onboarding-completion' }, [
+        `Completed on ${this.formatDateTime(onboarding.completionDate)}`
+      ]));
+    }
+
+    return card;
+  }
+
+  /**
+   * Generate UUID
+   */
+  generateUUID() {
+    return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  /**
+   * Cleanup
+   */
+  onDestroy() {
+    this.vacancies = [];
+    this.applications = [];
+    this.onboardings = [];
+    this.currentVacancy = null;
+    this.currentApplication = null;
+    this.currentUser = null;
+    this.defaultOrganization = null;
+  }
+}
+
+export { RecruitmentManagementApp };
+

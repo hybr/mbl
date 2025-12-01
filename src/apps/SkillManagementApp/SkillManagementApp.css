@@ -1,0 +1,136 @@
+/* SkillManagementApp.css - Responsive UI for Skill app */
+.skill-list-container {
+  margin: 24px 0;
+}
+.skill-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 16px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  transition: box-shadow 0.2s;
+}
+.skill-card:hover {
+  box-shadow: 0 6px 24px rgba(102, 126, 234, 0.09);
+  border-color: #cbd5e0;
+}
+.skill-card-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 4px;
+}
+.skill-card-details {
+  font-size: 14px;
+  color: #718096;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+.skill-card-details > div {
+  margin-top: 2px;
+}
+.skill-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.skill-actions {
+  margin-bottom: 16px;
+}
+.skill-actions .btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 7px;
+  font-size: 15px;
+  padding: 8px 20px;
+}
+.miniapp-header {
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.user-info {
+  font-size: 14px;
+  color: #667eea;
+  margin-left: 8px;
+}
+.skill-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  background: #f7fafc;
+  padding: 18px 14px 14px;
+  border-radius: 12px;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d3748;
+}
+.input {
+  padding: 8px 12px;
+  font-size: 15px;
+  border: 2px solid #e2e8f0;
+  border-radius: 7px;
+  background: #fff;
+  transition: border .2s;
+}
+.input:focus {
+  outline: none;
+  border-color: #667eea;
+  background: #f5f7fe;
+}
+textarea.input {
+  resize: vertical;
+  min-height: 50px;
+  max-height: 140px;
+}
+.form-actions {
+  display: flex;
+  gap: 12px;
+}
+.btn {
+  cursor: pointer;
+  padding: 7px 18px;
+  border-radius: 7px;
+  font-size: 15px;
+  font-weight: 600;
+  border: 2px solid #e2e8f0;
+  background: #f7fafc;
+  color: #667eea;
+  transition: background 0.2s, color 0.2s;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+}
+.btn-danger {
+  color: #e53e3e;
+  border-color: #e53e3e;
+  background: #fff5f5;
+}
+.btn-secondary {
+  background: #e2e8f0;
+  color: #2d3748;
+  border: none;
+}
+.btn-small {
+  padding: 5px 12px;
+  font-size: 14px;
+}
+@media (max-width: 640px) {
+  .miniapp-header { flex-direction: column; gap: 12px; }
+  .skill-form { padding: 10px 5px; }
+  .form-actions { flex-direction: column; gap: 7px; }
+  .skill-card { padding: 12px; }
+}
