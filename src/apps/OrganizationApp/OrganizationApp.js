@@ -250,6 +250,10 @@ class OrganizationApp extends MiniApp {
         this.renderViewDetails();
         break;
     }
+
+    if (this.currentView === 'list' && this.currentUser && this.organizations.length > 0) {
+      this.checkAndSetDefaultOrganization(); // ← safe here
+    }
   }
 
   /**
@@ -298,6 +302,14 @@ class OrganizationApp extends MiniApp {
         onClick: () => this.openBranchManagement()
       });
       actions.appendChild(this.components.branchesBtn.create());
+
+      // Add Hiring button
+      this.components.hiringBtn = new Button({
+        text: 'Hiring',
+        className: 'btn btn-secondary',
+        onClick: () => this.openHiringManagement()
+      });
+      actions.appendChild(this.components.hiringBtn.create());
 
     } else {
       const loginMsg = this.createElement('div', {
@@ -449,6 +461,14 @@ class OrganizationApp extends MiniApp {
     actions.appendChild(editBtn);
     actions.appendChild(deleteBtn);
 
+    if (org.subdomain) {
+      const visitBtn = this.createElement('button', {
+        className: 'btn btn-info btn-small',
+        onClick: () => window.open(`https://${org.subdomain}.v4l.app`, '_blank')
+      }, ['Visit Site']);
+      actions.appendChild(visitBtn);
+    }
+
     // Assemble card
     card.appendChild(logoContainer);
     card.appendChild(info);
@@ -593,7 +613,14 @@ class OrganizationApp extends MiniApp {
     this.components.subdomainInput = new Input({
       placeholder: 'mycompany',
       className: 'input subdomain-input',
-      value: this.currentOrganization?.subdomain || ''
+      value: this.currentOrganization?.subdomain || '',
+      onInput: (e) => {
+        let value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+        if (value.length > 63) value = value.slice(0, 63);
+        if (value.startsWith('-')) value = value.slice(1);
+        if (value.endsWith('-')) value = value.slice(0, -1);
+        e.target.value = value;
+      }
     });
     const subdomainSuffix = this.createElement('span', {
       className: 'subdomain-suffix'
@@ -602,6 +629,40 @@ class OrganizationApp extends MiniApp {
     subdomainWrapper.appendChild(subdomainSuffix);
     subdomainGroup.appendChild(subdomainLabel);
     subdomainGroup.appendChild(subdomainWrapper);
+
+    const subdomainStatus = this.createElement('span', { className: 'subdomain-status' });
+    subdomainWrapper.appendChild(subdomainStatus);
+
+    let timeout;
+    this.components.subdomainInput.element.addEventListener('input', async () => {
+      clearTimeout(timeout);
+      const value = this.components.subdomainInput.getValue().trim().toLowerCase();
+
+      if (value.length < 3) {
+        subdomainStatus.textContent = 'Too short';
+        subdomainStatus.className = 'subdomain-status error';
+        return;
+      }
+      if (!this.validateSubdomain(value)) {
+        subdomainStatus.textContent = 'Invalid format';
+        subdomainStatus.className = 'subdomain-status error';
+        return;
+      }
+
+      subdomainStatus.textContent = 'Checking...';
+      subdomainStatus.className = 'subdomain-status checking';
+
+      timeout = setTimeout(async () => {
+        const isUnique = await this.isSubdomainUnique(value, this.currentOrganization?._id);
+        if (isUnique) {
+          subdomainStatus.textContent = 'Available';
+          subdomainStatus.className = 'subdomain-status success';
+        } else {
+          subdomainStatus.textContent = 'Taken';
+          subdomainStatus.className = 'subdomain-status error';
+        }
+      }, 500);
+    });
 
     // Website
     const websiteGroup = this.createElement('div', { className: 'form-group' });
@@ -908,6 +969,24 @@ class OrganizationApp extends MiniApp {
   }
 
   /**
+ * Open HiringManagementApp
+ */
+  openHiringManagement() {
+    // Emit event to toggle HiringManagementApp
+    this.emit('app:toggleMiniApp', {
+      className: 'RecruitmentManagementApp',
+      containerSelector: 'recruitment-container'
+    });
+
+    // Alternative: Use the global app instance if available
+    if (window.app && window.app.toggleMiniApp) {
+      window.app.toggleMiniApp('RecruitmentManagementApp', 'recruitment-container');
+    }
+
+    this.logger.info('Opening RecruitmentManagementApp');
+  }
+
+  /**
    * Validate subdomain format
    */
   validateSubdomain(subdomain) {
@@ -1072,7 +1151,8 @@ class OrganizationApp extends MiniApp {
       // If deleted org was default, clear it and let auto-select handle setting new default
       if (isDefault) {
         localStorage.removeItem('defaultOrganization');
-        this.emit('organization:setDefault', null);
+        this.emit('organization:defaultChanged', null);
+        // this.emit('organization:setDefault', null);
       }
 
       // Emit event
@@ -1137,7 +1217,8 @@ class OrganizationApp extends MiniApp {
       this.logger.info('Setting default organization:', org.name);
 
       // Emit event to main app
-      this.emit('organization:setDefault', org);
+      // this.emit('organization:setDefault', org);
+      this.emit('organization:defaultChanged', org);
 
       if (!silent) {
         Notification.success(`"${org.name}" set as default organization`);

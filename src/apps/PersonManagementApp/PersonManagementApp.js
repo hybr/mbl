@@ -780,6 +780,11 @@ class PersonManagementApp extends MiniApp {
       onClick: () => this.openSkillsApp()
     }, ['🛠️ Skills']);
 
+    const hiringManagementAppBtn = this.createElement('button', {
+      className: 'btn btn-secondary',
+      onClick: () => this.RecruitmentManagementApp()
+    }, ['🛠️ Job Vacancies']);
+
     actions.appendChild(tasksBtn);
     actions.appendChild(notesBtn);
     actions.appendChild(messagesBtn);
@@ -787,6 +792,7 @@ class PersonManagementApp extends MiniApp {
     actions.appendChild(logoutBtn);
     actions.appendChild(educationBtn);
     actions.appendChild(skillsBtn);
+    actions.appendChild(hiringManagementAppBtn);
 
     // Assemble
     profileCard.appendChild(avatarSection);
@@ -1417,6 +1423,23 @@ class PersonManagementApp extends MiniApp {
     } catch (error) {
       this.logger.error('Failed to open Skills app:', error);
       this.showError('Failed to open Skills app');
+    }
+  }
+
+
+      /**
+   * Open HiringManagementApp
+   */
+  async RecruitmentManagementApp() {
+      try {
+      if (window.app) {
+        await window.app.toggleMiniApp('RecruitmentManagementApp', 'recruitment-container');
+      } else {
+        this.logger.warn('Global app instance not available');
+      }
+    } catch (error) {
+      this.logger.error('Failed to open RecruitmentManagement app:', error);
+      this.showError('Failed to open RecruitmentManagement app');
     }
   }
 

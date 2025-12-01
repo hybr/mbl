@@ -94,6 +94,7 @@ class RecruitmentManagementApp extends MiniApp {
         this.currentUser = user;
         this.determineViewMode();
         this.loadData();
+        this.updateViewBasedOnMode();
         if (this.isRendered) {
           this.render();
         }
@@ -112,6 +113,9 @@ class RecruitmentManagementApp extends MiniApp {
       // Subscribe to organization changes
       this.subscribe('organization:defaultChanged', (org) => {
         this.defaultOrganization = org;
+        this.determineViewMode();
+        this.loadData();
+        this.updateViewBasedOnMode();  // ← Add this
         if (this.isRendered) {
           this.render();
         }
@@ -131,6 +135,8 @@ class RecruitmentManagementApp extends MiniApp {
 
       // Load data
       await this.loadData();
+
+      this.updateViewBasedOnMode();
 
       this.logger.info('RecruitmentManagementApp initialized successfully');
 
@@ -210,16 +216,21 @@ class RecruitmentManagementApp extends MiniApp {
    */
   determineViewMode() {
     if (!this.currentUser) {
+      this.logger.info('Current user not logged in, setting view mode to public');
       this.viewMode = 'public';
       return;
     }
+    this.logger.info('Current user logged in:', this.currentUser);
 
     // Check if user has organization (org admin)
-    if (this.defaultOrganization) {
+    this.logger.info('Default organization:', this.defaultOrganization);
+    if (this.defaultOrganization && this.currentUser.username && this.currentUser.username == this.defaultOrganization.createdByUsername) {
       this.viewMode = 'org-admin';
     } else {
       this.viewMode = 'applicant';
     }
+
+    this.logger.info(`View mode set to ${this.viewMode}`);
   }
 
   /**
@@ -229,7 +240,7 @@ class RecruitmentManagementApp extends MiniApp {
     try {
       // Load departments
       try {
-        const deptResponse = await fetch('/data/department.json');
+        const deptResponse = await fetch('/data/departments.json');
         this.departments = await deptResponse.json();
         this.logger.info(`Loaded ${this.departments.length} departments`);
       } catch (e) {
@@ -239,7 +250,7 @@ class RecruitmentManagementApp extends MiniApp {
 
       // Load teams
       try {
-        const teamResponse = await fetch('/data/team.json');
+        const teamResponse = await fetch('/data/teams.json');
         this.teams = await teamResponse.json();
         this.logger.info(`Loaded ${this.teams.length} teams`);
       } catch (e) {
@@ -249,7 +260,7 @@ class RecruitmentManagementApp extends MiniApp {
 
       // Load designations
       try {
-        const desgResponse = await fetch('/data/designation.json');
+        const desgResponse = await fetch('/data/designations.json');
         this.designations = await desgResponse.json();
         this.logger.info(`Loaded ${this.designations.length} designations`);
       } catch (e) {
@@ -338,6 +349,7 @@ class RecruitmentManagementApp extends MiniApp {
       await this.loadPublicVacancies();
       this.onboardings = [];
     } else if (this.viewMode === 'org-admin') {
+      this.logger.info('Loading data for org-admin view mode');
       await this.loadOrgVacancies();
       await this.loadOrgApplications();
       await this.loadOrgOnboardings();
@@ -458,12 +470,14 @@ class RecruitmentManagementApp extends MiniApp {
     }
 
     try {
+      this.logger.info('Loading applications for organization:', this.defaultOrganization);
       const result = await this.db.query({
         selector: {
           type: 'application',
           organizationId: this.defaultOrganization._id
         }
       });
+      this.logger.info('Applications query result:', result);
       this.applications = result.docs || result;
       this.logger.info(`Loaded ${this.applications.length} organization applications`);
       if (this.isRendered) {
@@ -525,6 +539,24 @@ class RecruitmentManagementApp extends MiniApp {
   }
 
   /**
+ * Automatically switch to the correct view based on user role
+ */
+  updateViewBasedOnMode() {
+    if (this.viewMode === 'org-admin') {
+      this.currentView = 'org-vacancies';
+    } else if (this.viewMode === 'applicant') {
+      this.currentView = 'my-applications'; // or 'public-vacancies' if you prefer
+    } else {
+      this.currentView = 'public-vacancies';
+    }
+
+    // Force re-render with correct view
+    if (this.isRendered) {
+      this.render();
+    }
+  }
+
+  /**
    * Handle application changes
    */
   handleApplicationChange(change) {
@@ -575,6 +607,46 @@ class RecruitmentManagementApp extends MiniApp {
   async onRender() {
     this.clearContainer();
 
+    if (this.currentUser) {
+      const nav = this.createElement('div', { className: 'recruitment-nav' });
+
+      if (this.viewMode === 'org-admin') {
+        const links = [
+          { text: 'Vacancies', view: 'org-vacancies' },
+          { text: 'Applications', view: 'manage-applications' },
+          { text: 'Onboarding', view: 'onboarding' }
+        ];
+        links.forEach(link => {
+          const btn = this.createElement('button', {
+            className: `btn ${this.currentView === link.view ? 'btn-primary' : 'btn-secondary'} btn-small`,
+            onclick: () => {
+              this.currentView = link.view;
+              this.render();
+            }
+          }, [link.text]);
+          nav.appendChild(btn);
+        });
+      } else if (this.viewMode === 'applicant') {
+        const links = [
+          { text: 'Browse Jobs', view: 'public-vacancies' },
+          { text: 'My Applications', view: 'my-applications' }
+        ];
+        links.forEach(link => {
+          const btn = this.createElement('button', {
+            className: `btn ${this.currentView === link.view ? 'btn-primary' : 'btn-secondary'} btn-small`,
+            onclick: () => {
+              this.currentView = link.view;
+              this.render();
+            }
+          }, [link.text]);
+          nav.appendChild(btn);
+        });
+      }
+
+      this.container.appendChild(nav);
+      this.container.appendChild(this.createElement('hr'));
+    }
+
     switch (this.currentView) {
       case 'public-vacancies':
         this.renderPublicVacanciesView();
@@ -614,12 +686,12 @@ class RecruitmentManagementApp extends MiniApp {
    */
   renderPublicVacanciesView() {
     const header = this.createElement('div', { className: 'miniapp-header' });
-    const title = this.createElement('h2', {}, ['Open Positions']);
+    const title = this.createElement('h2', {}, ['Open Job Vacancies']);
     header.appendChild(title);
 
     // Search and filters
     const filters = this.createElement('div', { className: 'vacancy-filters' });
-    
+
     const searchGroup = this.createElement('div', { className: 'filter-group' });
     const searchInput = this.createElement('input', {
       type: 'text',
@@ -662,7 +734,7 @@ class RecruitmentManagementApp extends MiniApp {
 
     if (filteredVacancies.length === 0) {
       const empty = this.createElement('div', { className: 'empty-state' }, [
-        'No open positions found.'
+        'No open job vacancies found.'
       ]);
       listContainer.appendChild(empty);
     } else {
@@ -874,8 +946,8 @@ class RecruitmentManagementApp extends MiniApp {
    * Helper: Get team name
    */
   getTeamName(code) {
-    const team = this.teams.find(t => t.code === code);
-    return team ? team.name : code;
+    const team = this.teams.find(t => t.teamCode === code);
+    return team ? team.teamCode + ': ' + team.teamName : code;
   }
 
   /**
@@ -1107,9 +1179,9 @@ class RecruitmentManagementApp extends MiniApp {
     teamSelect.appendChild(teamEmpty);
     this.teams.forEach(team => {
       const option = this.createElement('option', {
-        value: team.code,
-        selected: this.currentVacancy && this.currentVacancy.teamCode === team.code
-      }, [team.name]);
+        value: team.teamCode,
+        selected: this.currentVacancy && this.currentVacancy.teamCode === team.teamCode
+      }, [team.teamName]);
       teamSelect.appendChild(option);
     });
     teamGroup.appendChild(teamSelect);
@@ -1677,8 +1749,8 @@ class RecruitmentManagementApp extends MiniApp {
     }
 
     // Check if already applied
-    const existingApp = this.applications.find(a => 
-      a.vacancyId === this.currentVacancy._id && 
+    const existingApp = this.applications.find(a =>
+      a.vacancyId === this.currentVacancy._id &&
       a.applicantId === this.currentUser._id
     );
 
