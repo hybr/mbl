@@ -14,7 +14,8 @@
       "Bash(curl:*)",
       "Bash(timeout 5 bash:*)",
       "Bash(dir \"C:\\Users\\fwyog\\mbl\\src\" /s /b)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []
