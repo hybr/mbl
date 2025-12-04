@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Vocal 4 Local - Connecting vocal customers with local businesses through smart geo-sensing technology">
+  <meta name="keywords" content="local business, geo-sensing, vocal for local, V4L, community, nearby businesses">
+  <meta name="theme-color" content="#2563eb">
+
+  <title>V4L - Vocal 4 Local</title>
+
+  <!-- PouchDB -->
+  <script src="https://cdn.jsdelivr.net/npm/pouchdb@8.0.1/dist/pouchdb.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pouchdb@8.0.1/dist/pouchdb.find.min.js"></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/miniapps.css">
+  <link rel="stylesheet" href="src/apps/PersonManagementApp/PersonManagementApp.css">
+  <link rel="stylesheet" href="src/apps/DataViewerApp/DataViewerApp.css">
+  <link rel="stylesheet" href="src/apps/OrganizationApp/OrganizationApp.css">
+  <link rel="stylesheet" href="src/apps/BranchManagementApp/BranchManagementApp.css">
+  <link rel="stylesheet" href="src/apps/EducationManagementApp/EducationManagementApp.css">
+
+  <!-- Message System Styles -->
+  <link rel="stylesheet" href="src/components/ToastNotificationManager.css">
+  <link rel="stylesheet" href="src/components/ActionableMessageModal.css">
+  <link rel="stylesheet" href="src/apps/MessageInboxApp/MessageInboxApp.css">
+
+  <!-- Prevent iOS bounce -->
+  <style>
+    body {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-content">
+      <div class="app-branding">
+        <h1 class="app-title">V4L</h1>
+        <span class="app-tagline">Vocal 4 Local</span>
+      </div>
+      <div class="header-status">
+        <a href="#" id="organization-link" class="header-link">Org</a>
+        <!-- <span id="network-status" class="status-indicator status-online">Online</span> -->
+        <!-- <span id="sync-status" class="status-indicator">Ready</span> -->
+        <a href="#" id="auth-link" class="auth-link">Login</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- App Controls -->
+  <!-- <nav class="app-controls">
+    <button id="toggle-notes" class="btn btn-control">Show Notes</button>
+    <button id="toggle-tasks" class="btn btn-control">Show Tasks</button>
+    <button id="toggle-settings" class="btn btn-control">Show Settings</button>
+  </nav> -->
+
+  <!-- Main Content Area -->
+  <main class="app-main">
+    <!-- Welcome Banner -->
+    <div class="welcome-banner" id="welcome-banner">
+      <button class="welcome-banner-close" id="welcome-banner-close" aria-label="Close welcome banner">&times;</button>
+      <div class="welcome-content">
+        <h2 class="welcome-title">Welcome to V4L - Vocal 4 Local</h2>
+        <p class="welcome-description">
+          Connecting vocal customers with local businesses through smart geo-sensing technology.
+          Discover and support businesses in your community while they discover you.
+        </p>
+      </div>
+    </div>
+
+    <!-- MiniApp Containers - Dynamically added -->
+    <div class="miniapp-grid" id="miniapp-grid">
+      <!-- MiniApp cards will be prepended here dynamically -->
+    </div>
+  </main>
+
+  <!-- Loading Indicator -->
+  <div id="loading-indicator" class="loading-overlay" style="display: none;">
+    <div class="loading-spinner"></div>
+    <p>Loading...</p>
+  </div>
+
+  <!-- Application Scripts (ES6 Modules) -->
+  <script type="module" src="src/app.js"></script>
+
+  <!-- Capacitor Runtime (uncomment when building for mobile) -->
+  <!--
+  <script src="capacitor.js"></script>
+  -->
+
+  <!-- Service Worker Management -->
+  <script>
+    // Unregister any existing service workers to prevent cache issues
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    }
+  </script>
+</body>
+</html>

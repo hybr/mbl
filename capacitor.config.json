@@ -1,7 +1,7 @@
 {
   "appId": "app.v4l",
   "appName": "Vocal 4 Local",
-  "webDir": ".",
+  "webDir": "www",
   "bundledWebRuntime": false,
   "server": {
     "androidScheme": "https"

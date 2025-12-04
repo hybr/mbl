@@ -1,0 +1,273 @@
+{
+  "description": "Sample Person Records for PersonManagementMiniApp",
+  "version": "1.0",
+  "samples": [
+    {
+      "name": "Complete Person Record with All Fields",
+      "document": {
+        "_id": "person:550e8400-e29b-41d4-a716-446655440000",
+        "_rev": "1-abc123",
+        "type": "person",
+        "namePrefix": "Dr.",
+        "firstName": "John",
+        "middleName": "Robert",
+        "lastName": "Doe",
+        "nameSuffix": "Jr.",
+        "dateOfBirth": "1990-01-15",
+        "gender": "M",
+        "primaryPhone": "+1-555-0123",
+        "primaryEmail": "john.doe@example.com",
+        "fatherId": null,
+        "motherId": null,
+        "username": "johndoe",
+        "credentials": {
+          "hashedPassword": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+          "otp": null,
+          "failedLoginAttempts": 0,
+          "lastLoginAt": "2025-01-15T10:30:00.000Z",
+          "lastFailedLoginAt": null,
+          "passwordUpdatedAt": "2025-01-01T00:00:00.000Z"
+        },
+        "createdAt": "2025-01-15T10:00:00.000Z",
+        "updatedAt": "2025-01-15T10:30:00.000Z"
+      }
+    },
+    {
+      "name": "Minimal Person Record (Required Fields Only)",
+      "document": {
+        "_id": "person:660e8400-e29b-41d4-a716-446655440001",
+        "_rev": "1-def456",
+        "type": "person",
+        "firstName": "Jane",
+        "primaryEmail": "jane.smith@example.com",
+        "username": "janesmith",
+        "credentials": {
+          "hashedPassword": "6dcd4ce23d88e2ee9568ba546c007c63d9131c1b116f8c9c1e4c3e4e4e4e4e4e",
+          "failedLoginAttempts": 0
+        },
+        "createdAt": "2025-01-15T11:00:00.000Z"
+      }
+    },
+    {
+      "name": "Person with Parent Relations",
+      "parent_records": {
+        "father": {
+          "_id": "person:770e8400-e29b-41d4-a716-446655440010",
+          "_rev": "1-ghi789",
+          "type": "person",
+          "firstName": "Robert",
+          "lastName": "Smith",
+          "gender": "M",
+          "primaryEmail": "robert.smith@example.com",
+          "username": "robertsmith",
+          "credentials": {
+            "hashedPassword": "abc123def456...",
+            "failedLoginAttempts": 0
+          },
+          "createdAt": "2025-01-10T10:00:00.000Z"
+        },
+        "mother": {
+          "_id": "person:880e8400-e29b-41d4-a716-446655440011",
+          "_rev": "1-jkl012",
+          "type": "person",
+          "firstName": "Mary",
+          "lastName": "Smith",
+          "gender": "F",
+          "primaryEmail": "mary.smith@example.com",
+          "username": "marysmith",
+          "credentials": {
+            "hashedPassword": "xyz789uvw456...",
+            "failedLoginAttempts": 0
+          },
+          "createdAt": "2025-01-10T10:05:00.000Z"
+        }
+      },
+      "child": {
+        "_id": "person:990e8400-e29b-41d4-a716-446655440012",
+        "_rev": "1-mno345",
+        "type": "person",
+        "firstName": "Tommy",
+        "lastName": "Smith",
+        "gender": "M",
+        "dateOfBirth": "2015-06-10",
+        "primaryEmail": "tommy.smith@example.com",
+        "username": "tommysmith",
+        "fatherId": "person:770e8400-e29b-41d4-a716-446655440010",
+        "motherId": "person:880e8400-e29b-41d4-a716-446655440011",
+        "credentials": {
+          "hashedPassword": "qrs678tuv901...",
+          "failedLoginAttempts": 0
+        },
+        "createdAt": "2025-01-15T12:00:00.000Z"
+      }
+    },
+    {
+      "name": "Person with Failed Login Attempts",
+      "document": {
+        "_id": "person:aa0e8400-e29b-41d4-a716-446655440020",
+        "_rev": "3-pqr678",
+        "type": "person",
+        "firstName": "Alice",
+        "lastName": "Johnson",
+        "primaryEmail": "alice.johnson@example.com",
+        "username": "alicej",
+        "credentials": {
+          "hashedPassword": "def456ghi789...",
+          "failedLoginAttempts": 3,
+          "lastLoginAt": "2025-01-14T15:00:00.000Z",
+          "lastFailedLoginAt": "2025-01-15T09:45:00.000Z",
+          "passwordUpdatedAt": "2025-01-01T00:00:00.000Z"
+        },
+        "createdAt": "2025-01-10T08:00:00.000Z",
+        "updatedAt": "2025-01-15T09:45:00.000Z"
+      }
+    },
+    {
+      "name": "Person with OTP Required",
+      "document": {
+        "_id": "person:bb0e8400-e29b-41d4-a716-446655440030",
+        "_rev": "2-stu901",
+        "type": "person",
+        "firstName": "Bob",
+        "lastName": "Williams",
+        "primaryEmail": "bob.williams@example.com",
+        "username": "bobw",
+        "credentials": {
+          "hashedPassword": "jkl012mno345...",
+          "otp": "123456",
+          "failedLoginAttempts": 0,
+          "lastLoginAt": "2025-01-15T08:00:00.000Z",
+          "passwordUpdatedAt": "2025-01-10T00:00:00.000Z"
+        },
+        "createdAt": "2025-01-12T10:00:00.000Z",
+        "updatedAt": "2025-01-15T08:00:00.000Z"
+      }
+    },
+    {
+      "name": "Person with Locked Account (5+ Failed Attempts)",
+      "document": {
+        "_id": "person:cc0e8400-e29b-41d4-a716-446655440040",
+        "_rev": "7-vwx234",
+        "type": "person",
+        "firstName": "Charlie",
+        "lastName": "Brown",
+        "primaryEmail": "charlie.brown@example.com",
+        "username": "charlieb",
+        "credentials": {
+          "hashedPassword": "pqr678stu901...",
+          "failedLoginAttempts": 5,
+          "lastLoginAt": "2025-01-10T12:00:00.000Z",
+          "lastFailedLoginAt": "2025-01-15T14:30:00.000Z",
+          "passwordUpdatedAt": "2025-01-01T00:00:00.000Z"
+        },
+        "createdAt": "2025-01-05T10:00:00.000Z",
+        "updatedAt": "2025-01-15T14:30:00.000Z"
+      }
+    }
+  ],
+  "data_for_import": {
+    "description": "Sample data to import into PouchDB for testing",
+    "docs": [
+      {
+        "_id": "person:test-001",
+        "type": "person",
+        "namePrefix": "Mr.",
+        "firstName": "David",
+        "lastName": "Anderson",
+        "gender": "M",
+        "dateOfBirth": "1985-03-22",
+        "primaryPhone": "+1-555-0201",
+        "primaryEmail": "david.anderson@example.com",
+        "username": "davida",
+        "credentials": {
+          "hashedPassword": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+          "failedLoginAttempts": 0,
+          "passwordUpdatedAt": "2025-01-15T00:00:00.000Z"
+        },
+        "createdAt": "2025-01-15T10:00:00.000Z"
+      },
+      {
+        "_id": "person:test-002",
+        "type": "person",
+        "firstName": "Emma",
+        "lastName": "Wilson",
+        "gender": "F",
+        "dateOfBirth": "1992-07-08",
+        "primaryPhone": "+1-555-0202",
+        "primaryEmail": "emma.wilson@example.com",
+        "username": "emmaw",
+        "credentials": {
+          "hashedPassword": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+          "failedLoginAttempts": 0,
+          "passwordUpdatedAt": "2025-01-15T00:00:00.000Z"
+        },
+        "createdAt": "2025-01-15T10:05:00.000Z"
+      },
+      {
+        "_id": "person:test-003",
+        "type": "person",
+        "firstName": "Oliver",
+        "lastName": "Taylor",
+        "gender": "M",
+        "dateOfBirth": "2018-11-30",
+        "primaryEmail": "oliver.taylor@example.com",
+        "username": "olivert",
+        "fatherId": "person:test-001",
+        "motherId": "person:test-002",
+        "credentials": {
+          "hashedPassword": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+          "failedLoginAttempts": 0,
+          "passwordUpdatedAt": "2025-01-15T00:00:00.000Z"
+        },
+        "createdAt": "2025-01-15T10:10:00.000Z"
+      }
+    ]
+  },
+  "import_instructions": {
+    "description": "How to import sample data into PouchDB",
+    "steps": [
+      "1. Open browser console on the demo page",
+      "2. Load the sample data from this JSON file",
+      "3. Run: personApp.db.bulkDocs(sampleData.data_for_import.docs)",
+      "4. The UI will automatically refresh with the new persons"
+    ],
+    "example_code": "fetch('person-sample-data.json')\n  .then(r => r.json())\n  .then(data => personApp.db.bulkDocs(data.data_for_import.docs))\n  .then(() => console.log('Sample data imported!'))\n  .catch(err => console.error('Import failed:', err));"
+  },
+  "validation_rules": {
+    "required_fields": [
+      "firstName",
+      "primaryEmail",
+      "username"
+    ],
+    "username": {
+      "unique": true,
+      "case_insensitive": true,
+      "min_length": 3,
+      "pattern": "alphanumeric and underscores"
+    },
+    "primaryEmail": {
+      "format": "email",
+      "unique": false
+    },
+    "gender": {
+      "enum": ["M", "F", "O"]
+    },
+    "dateOfBirth": {
+      "format": "ISO 8601 date (YYYY-MM-DD)"
+    },
+    "fatherId": {
+      "format": "person:uuid",
+      "must_exist": true
+    },
+    "motherId": {
+      "format": "person:uuid",
+      "must_exist": true
+    }
+  },
+  "password_notes": {
+    "demo_hash": "SHA-256 (not secure for production)",
+    "production_recommendation": "bcrypt or Argon2",
+    "example_plaintext": "password123",
+    "example_sha256_hash": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8"
+  }
+}

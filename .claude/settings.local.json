@@ -15,7 +15,16 @@
       "Bash(timeout 5 bash:*)",
       "Bash(dir \"C:\\Users\\fwyog\\mbl\\src\" /s /b)",
       "Bash(git log:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run capacitor:add:android:*)",
+      "Bash(findstr:*)",
+      "Bash(npx cap sync:*)",
+      "Bash(gradlew.bat assembleDebug)",
+      "Bash(.gradlew.bat assembleDebug)",
+      "Bash(./gradlew assembleDebug:*)",
+      "Bash(./gradlew.bat assembleDebug)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []
