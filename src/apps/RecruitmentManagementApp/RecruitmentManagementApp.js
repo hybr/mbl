@@ -57,7 +57,7 @@ import {
 } from './viewHelpers.js';
 
 // Components
-import { createVacancyCard } from '../../components/VacancyCard.js';
+import { VacancyCard } from '../../components/VacancyCard.js';
 import { createApplicationCard } from '../../components/ApplicationCard.js';
 import { createOnboardingCard } from '../../components/OnboardingCard.js';
 
@@ -579,75 +579,23 @@ class RecruitmentManagementApp extends MiniApp {
    * Render vacancy card
    */
   renderVacancyCard(vacancy, isPublic = false) {
-    const card = this.createElement('div', { className: 'vacancy-card' });
+    const hasApplied = this.applications.some(a => a.vacancyId === vacancy._id);
 
-    const title = this.createElement('div', { className: 'vacancy-card-title' }, [
-      vacancy.title || 'Untitled Position'
-    ]);
+    const vacancyCard = new VacancyCard({
+      vacancy,
+      isPublic,
+      getOrganizationName: (orgId) => this.getOrganizationName(orgId),
+      getDepartmentName: (code) => this.getDepartmentName(code),
+      onViewDetails: (id) => this.showVacancyDetailsView(id),
+      onApply: (id) => this.showApplicationFormView(id),
+      onEdit: (id) => this.showEditVacancyView(id),
+      onViewApplications: (id) => this.showManageApplicationsView(id),
+      hasApplied,
+      currentUser: this.currentUser,
+      createElement: this.createElement.bind(this)
+    });
 
-    const orgName = this.getOrganizationName(vacancy.organizationId);
-    const orgInfo = this.createElement('div', { className: 'vacancy-card-org' }, [orgName]);
-
-    const deptName = this.getDepartmentName(vacancy.departmentCode);
-    const deptInfo = this.createElement('div', { className: 'vacancy-card-dept' }, [
-      deptName || 'N/A'
-    ]);
-
-    const statusBadge = this.createElement('span', {
-      className: `status-badge status-${vacancy.status}`
-    }, [vacancy.status || 'draft']);
-
-    const details = this.createElement('div', { className: 'vacancy-card-details' });
-    if (vacancy.workExperienceYears) {
-      details.appendChild(this.createElement('div', {}, [
-        `Experience: ${vacancy.workExperienceYears} years`
-      ]));
-    }
-
-    const actions = this.createElement('div', { className: 'vacancy-card-actions' });
-
-    if (isPublic) {
-      const viewBtn = this.createElement('button', {
-        className: 'btn btn-small btn-primary',
-        onclick: () => this.showVacancyDetailsView(vacancy._id)
-      }, ['View Details']);
-      actions.appendChild(viewBtn);
-
-      if (this.currentUser) {
-        const hasApplied = this.applications.some(a => a.vacancyId === vacancy._id);
-        if (!hasApplied) {
-          const applyBtn = this.createElement('button', {
-            className: 'btn btn-small btn-secondary',
-            onclick: () => this.showApplicationFormView(vacancy._id)
-          }, ['Apply']);
-          actions.appendChild(applyBtn);
-        } else {
-          const appliedBadge = this.createElement('span', { className: 'applied-badge' }, ['Applied']);
-          actions.appendChild(appliedBadge);
-        }
-      }
-    } else {
-      const editBtn = this.createElement('button', {
-        className: 'btn btn-small btn-secondary',
-        onclick: () => this.showEditVacancyView(vacancy._id)
-      }, ['Edit']);
-      actions.appendChild(editBtn);
-
-      const appsBtn = this.createElement('button', {
-        className: 'btn btn-small btn-primary',
-        onclick: () => this.showManageApplicationsView(vacancy._id)
-      }, ['Applications']);
-      actions.appendChild(appsBtn);
-    }
-
-    card.appendChild(title);
-    card.appendChild(orgInfo);
-    card.appendChild(deptInfo);
-    card.appendChild(statusBadge);
-    card.appendChild(details);
-    card.appendChild(actions);
-
-    return card;
+    return vacancyCard.render();
   }
 
   /**

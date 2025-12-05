@@ -13,7 +13,7 @@ import { isDefaultOrganization } from '../viewHelpers.js';
  * @returns {void}
  */
 export function renderListView(app) {
-  // Header
+  // Header with title and user info
   const header = app.createElement('div', { className: 'miniapp-header' });
 
   const titleContainer = app.createElement('div', { className: 'header-title-container' });
@@ -29,46 +29,50 @@ export function renderListView(app) {
 
   header.appendChild(titleContainer);
 
-  // Action buttons
-  const actions = app.createElement('div', { className: 'org-actions' });
+  // Action buttons section
+  const actionsSection = app.createElement('div', { className: 'org-actions-section' });
 
   if (app.currentUser) {
+    // Primary action
+    const primaryActions = app.createElement('div', { className: 'org-actions-primary' });
     app.components.createBtn = new Button({
       text: '+ Create Organization',
       className: 'btn btn-primary',
       onClick: () => app.showEditView(null)
     });
-    actions.appendChild(app.components.createBtn.create());
+    primaryActions.appendChild(app.components.createBtn.create());
+    actionsSection.appendChild(primaryActions);
 
-    // Add Readonly Data button
+    // Secondary actions
+    const secondaryActions = app.createElement('div', { className: 'org-actions-secondary' });
+
     app.components.readonlyDataBtn = new Button({
       text: 'Readonly Data',
       className: 'btn btn-secondary',
       onClick: () => app.openDataViewer()
     });
-    actions.appendChild(app.components.readonlyDataBtn.create());
+    secondaryActions.appendChild(app.components.readonlyDataBtn.create());
 
-    // Add Branches button
     app.components.branchesBtn = new Button({
       text: 'Branches',
       className: 'btn btn-secondary',
       onClick: () => app.openBranchManagement()
     });
-    actions.appendChild(app.components.branchesBtn.create());
+    secondaryActions.appendChild(app.components.branchesBtn.create());
 
-    // Add Hiring button
     app.components.hiringBtn = new Button({
       text: 'Hiring',
       className: 'btn btn-secondary',
       onClick: () => app.openHiringManagement()
     });
-    actions.appendChild(app.components.hiringBtn.create());
+    secondaryActions.appendChild(app.components.hiringBtn.create());
 
+    actionsSection.appendChild(secondaryActions);
   } else {
     const loginMsg = app.createElement('div', {
       className: 'login-message'
     }, ['Please log in to create and manage organizations']);
-    actions.appendChild(loginMsg);
+    actionsSection.appendChild(loginMsg);
   }
 
   // Organizations list
@@ -103,6 +107,6 @@ export function renderListView(app) {
 
   // Assemble UI
   app.container.appendChild(header);
-  app.container.appendChild(actions);
+  app.container.appendChild(actionsSection);
   app.container.appendChild(listContainer);
 }

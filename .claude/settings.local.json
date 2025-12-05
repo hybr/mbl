@@ -24,7 +24,8 @@
       "Bash(.gradlew.bat assembleDebug)",
       "Bash(./gradlew assembleDebug:*)",
       "Bash(./gradlew.bat assembleDebug)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(ls -la \"C:\\Users\\Faber\\b\\y\\mbl\\src\\components\"\" 2>&1 || echo \"Directory check \")"
     ],
     "deny": [],
     "ask": []

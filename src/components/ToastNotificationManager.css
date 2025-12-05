@@ -127,29 +127,44 @@
 /* Close button */
 .toast-close {
   flex-shrink: 0;
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
   background: none;
   border: none;
   color: #9ca3af;
   font-size: 24px;
   line-height: 1;
   cursor: pointer;
-  padding: 0;
+  padding: 4px;
+  margin: -4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s;
+  transition: all 0.2s;
+  border-radius: 4px;
+  position: relative;
 }
 
 .toast-close:hover {
   color: #4b5563;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.toast-close:active {
+  background: rgba(0, 0, 0, 0.1);
+  transform: scale(0.95);
 }
 
 .toast-close:focus {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
-  border-radius: 4px;
+}
+
+.toast-close:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
 }
 
 /* Clickable toast */
@@ -221,6 +236,11 @@
 
   .toast-close:hover {
     color: #9ca3af;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .toast-close:active {
+    background: rgba(255, 255, 255, 0.15);
   }
 }
 

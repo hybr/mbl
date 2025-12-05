@@ -29,7 +29,7 @@ export function renderViewDetails(app) {
   // Organization details
   const detailsContainer = app.createElement('div', { className: 'org-details' });
 
-  // Logo
+  // Logo section
   const logoSection = app.createElement('div', { className: 'org-details-logo-section' });
   if (org.logo) {
     const logo = app.createElement('img', {
@@ -45,13 +45,16 @@ export function renderViewDetails(app) {
     logoSection.appendChild(placeholder);
   }
 
+  // Main content wrapper
+  const contentWrapper = app.createElement('div', { className: 'org-details-content' });
+
   // Name and tagline
   const name = app.createElement('h2', { className: 'org-details-name' }, [org.name]);
-  detailsContainer.appendChild(name);
+  contentWrapper.appendChild(name);
 
   if (org.tagline) {
     const tagline = app.createElement('div', { className: 'org-details-tagline' }, [org.tagline]);
-    detailsContainer.appendChild(tagline);
+    contentWrapper.appendChild(tagline);
   }
 
   // Details grid
@@ -147,7 +150,11 @@ export function renderViewDetails(app) {
   createdItem.appendChild(createdValue);
   detailsGrid.appendChild(createdItem);
 
-  detailsContainer.appendChild(detailsGrid);
+  contentWrapper.appendChild(detailsGrid);
+
+  // Assemble logo and content into main container
+  detailsContainer.appendChild(logoSection);
+  detailsContainer.appendChild(contentWrapper);
 
   // Actions
   const actions = app.createElement('div', { className: 'org-details-actions' });
@@ -170,7 +177,6 @@ export function renderViewDetails(app) {
 
   // Assemble UI
   app.container.appendChild(header);
-  app.container.appendChild(logoSection);
   app.container.appendChild(detailsContainer);
   app.container.appendChild(actions);
 }

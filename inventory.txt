@@ -1,0 +1,216 @@
+🟦 1. FOUNDATIONAL MINI APPS
+
+(These are needed for all inventory types)
+
+Inventory Master Settings
+
+Location Manager (Warehouse → Zone → Rack → Bin)
+
+Category & Subcategory Manager
+
+UOM (Units of Measurement) Manager
+
+Barcode/QR Code Generator
+
+Label Printing App
+
+Supplier/Vendor Manager
+
+Customer/Consumer Manager
+
+Inventory Alerts & Threshold Rules
+
+Inventory Audit Log Viewer
+
+Reports & Analytics Builder
+
+Mobile Scanner App
+
+Batch & Lot Manager
+
+Expiry/Best-Before Tracker
+
+Inventory Document Manager (PO, GRN, SO, DO)
+
+Multi-Store/Warehouse Manager
+
+🟧 2. GOODS INVENTORY MINI APPS
+
+(Raw Materials, WIP, Finished Goods)
+
+Inbound / Stock In
+
+Goods Receipt (GRN) App
+
+Putaway App
+
+Purchase Order Intake App
+
+Supplier Delivery Verification App
+
+Stock Operations
+
+Inventory Count (Cycle Count)
+
+Full Physical Stock Audit
+
+Stock Adjustment App
+
+Batch Reconciliation App
+
+Production / WIP
+
+Bill of Materials (BOM) Ingredient Issue App
+
+WIP Tracker
+
+Finished Goods Conversion App
+
+Scrap/Rejection Tracking App
+
+Outbound
+
+Picking List App
+
+Packing App
+
+Dispatch/Shipment App
+
+Delivery Note Generator
+
+Specialized
+
+Cold Storage Inventory App
+
+Hazardous Material (HAZMAT) Tracking
+
+Perishable Goods & Expiry Management
+
+🟩 3. ASSET INVENTORY MINI APPS
+
+(Equipment, Machines, IoT Devices, Tools)
+
+Asset Lifecycle
+
+Asset Onboarding App
+
+Asset Assignment App (Employee/Location)
+
+Asset Movement Tracker
+
+Asset Offboarding/Disposal App
+
+Asset Maintenance
+
+Preventive Maintenance Scheduler
+
+Calibration & Certification Tracker
+
+IoT Device Health Monitor
+
+Firmware Update Manager
+
+AMC/Contract Manager
+
+Warranty Tracking App
+
+Asset Tracking
+
+Real-Time GPS/Tag Tracking App
+
+RFID/Beacon Tracking App
+
+Asset Utilization Dashboard
+
+🟨 4. MRO INVENTORY MINI APPS
+
+(Spare Parts, Maintenance Consumables)
+
+Spare Parts Mgmt
+
+Spare Parts Catalog Manager
+
+Spare Parts Reservation App
+
+Spare Parts Issue & Return App
+
+Critical Spares Threshold Manager
+
+Maintenance Operations
+
+Work Order Management App
+
+Breakdown Maintenance App
+
+Preventive Maintenance Task App
+
+Maintenance Checklist App
+
+Technician Assignment App
+
+Consumables
+
+Consumables Request App
+
+Consumables Auto-Replenishment Rules
+
+🟪 5. SERVICE INVENTORY MINI APPS
+
+(Services instead of goods — tasks, activities, SLAs)
+
+Service Definition & Catalog
+
+Service Catalog Manager
+
+Service Code & Pricing Manager
+
+SLA Rules Manager
+
+Service Operations
+
+Task Assignment App
+
+Activity Checklist App
+
+Service Scheduling App
+
+Field Service Mobile App
+
+Service Completion & Confirmation App
+
+Billing & Verification
+
+Service Billing App
+
+Service Quality Audit App
+
+🟥 6. CROSS-FUNCTIONAL MINI APPS (APPLY TO ALL INVENTORIES)
+Workflows
+
+Approval Workflow Builder
+
+Automation Rules (IFTTT Engine)
+
+Notification & Alert Center
+
+Analytics & Dashboards
+
+Inventory Heatmap Dashboard
+
+Consumption Rate Analyzer
+
+Supplier Performance Dashboard
+
+Lead Time Analyzer
+
+Cost & Valuation Dashboard
+
+Integrations
+
+ERP Sync App
+
+IoT Sensor Data Linker
+
+Barcode Printer Integration
+
+Logistics/Shipment Integration

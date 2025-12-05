@@ -3,87 +3,180 @@
  * Reusable vacancy card component
  */
 
+import { Card } from './Card.js';
 import { createStatusBadge } from './StatusBadge.js';
 
-export function createVacancyCard(options) {
-  const {
-    createElement,
-    vacancy,
-    isPublic,
-    getOrganizationName,
-    getDepartmentName,
-    onViewDetails,
-    onApply,
-    onEdit,
-    onViewApplications,
-    hasApplied,
-    currentUser
-  } = options;
-
-  const card = createElement('div', { className: 'vacancy-card' });
-
-  const title = createElement('div', { className: 'vacancy-card-title' }, [
-    vacancy.title || 'Untitled Position'
-  ]);
-
-  const orgName = getOrganizationName(vacancy.organizationId);
-  const orgInfo = createElement('div', { className: 'vacancy-card-org' }, [orgName]);
-
-  const deptName = getDepartmentName(vacancy.departmentCode);
-  const deptInfo = createElement('div', { className: 'vacancy-card-dept' }, [
-    deptName || 'N/A'
-  ]);
-
-  const statusBadge = createStatusBadge(createElement, vacancy.status, vacancy.status || 'draft');
-
-  const details = createElement('div', { className: 'vacancy-card-details' });
-  if (vacancy.workExperienceYears) {
-    details.appendChild(createElement('div', {}, [
-      `Experience: ${vacancy.workExperienceYears} years`
-    ]));
+/**
+ * VacancyCard Component
+ * Displays vacancy information in a card format
+ */
+export class VacancyCard {
+  constructor(options = {}) {
+    this.vacancy = options.vacancy;
+    this.isPublic = options.isPublic || false;
+    this.getOrganizationName = options.getOrganizationName;
+    this.getDepartmentName = options.getDepartmentName;
+    this.onViewDetails = options.onViewDetails;
+    this.onApply = options.onApply;
+    this.onEdit = options.onEdit;
+    this.onViewApplications = options.onViewApplications;
+    this.hasApplied = options.hasApplied || false;
+    this.currentUser = options.currentUser;
+    this.createElement = options.createElement;
   }
 
-  const actions = createElement('div', { className: 'vacancy-card-actions' });
-
-  if (isPublic) {
-    const viewBtn = createElement('button', {
-      className: 'btn btn-small btn-primary',
-      onclick: () => onViewDetails(vacancy._id)
-    }, ['View Details']);
-    actions.appendChild(viewBtn);
-
-    if (currentUser) {
-      if (!hasApplied) {
-        const applyBtn = createElement('button', {
-          className: 'btn btn-small btn-secondary',
-          onclick: () => onApply(vacancy._id)
-        }, ['Apply']);
-        actions.appendChild(applyBtn);
-      } else {
-        const appliedBadge = createElement('span', { className: 'applied-badge' }, ['Applied']);
-        actions.appendChild(appliedBadge);
-      }
+  /**
+   * Render the vacancy card
+   * @returns {HTMLElement} Card element
+   */
+  render() {
+    // Safety check
+    if (!this.vacancy || !this.vacancy.title) {
+      console.warn('Skipping vacancy with missing title:', this.vacancy);
+      return this.createElement('div', { className: 'vacancy-card-error' }, ['Invalid vacancy data']);
     }
-  } else {
-    const editBtn = createElement('button', {
-      className: 'btn btn-small btn-secondary',
-      onclick: () => onEdit(vacancy._id)
-    }, ['Edit']);
-    actions.appendChild(editBtn);
 
-    const appsBtn = createElement('button', {
-      className: 'btn btn-small btn-primary',
-      onclick: () => onViewApplications(vacancy._id)
-    }, ['Applications']);
-    actions.appendChild(appsBtn);
+    // Build header content
+    const headerContent = this._buildHeader();
+
+    // Build body content
+    const bodyContent = this._buildBody();
+
+    // Build footer content
+    const footerContent = this._buildFooter();
+
+    // Create card using generic Card component
+    const card = new Card({
+      className: 'vacancy-card',
+      isActive: false,
+      headerContent,
+      bodyContent,
+      footerContent,
+      createElement: this.createElement
+    });
+
+    return card.render();
   }
 
-  card.appendChild(title);
-  card.appendChild(orgInfo);
-  card.appendChild(deptInfo);
-  card.appendChild(statusBadge);
-  card.appendChild(details);
-  card.appendChild(actions);
+  /**
+   * Build header section with title and organization
+   * @private
+   * @returns {Array} Header elements
+   */
+  _buildHeader() {
+    // Icon placeholder for vacancy (briefcase emoji)
+    const icon = this.createElement('div', {
+      className: 'vacancy-icon'
+    }, ['💼']);
 
-  return card;
+    // Title and organization
+    const contentElements = [];
+    const title = this.createElement('h3', { className: 'vacancy-title' }, [
+      this.vacancy.title || 'Untitled Position'
+    ]);
+    contentElements.push(title);
+
+    const orgName = this.getOrganizationName(this.vacancy.organizationId);
+    const orgInfo = this.createElement('div', { className: 'vacancy-org' }, [orgName]);
+    contentElements.push(orgInfo);
+
+    return Card.createHeaderWithLogo({
+      logo: icon,
+      content: contentElements,
+      createElement: this.createElement
+    });
+  }
+
+  /**
+   * Build body section with details
+   * @private
+   * @returns {Array} Body elements
+   */
+  _buildBody() {
+    const bodyElements = [];
+
+    // Department
+    const deptName = this.getDepartmentName(this.vacancy.departmentCode);
+    const deptInfo = this.createElement('div', { className: 'vacancy-department' }, [
+      `Department: ${deptName || 'N/A'}`
+    ]);
+    bodyElements.push(deptInfo);
+
+    // Status badge
+    const statusBadge = createStatusBadge(
+      this.createElement,
+      this.vacancy.status,
+      this.vacancy.status || 'draft'
+    );
+    bodyElements.push(statusBadge);
+
+    // Experience requirement
+    if (this.vacancy.workExperienceYears) {
+      const experience = this.createElement('div', { className: 'vacancy-experience' }, [
+        `Experience: ${this.vacancy.workExperienceYears} years`
+      ]);
+      bodyElements.push(experience);
+    }
+
+    return bodyElements;
+  }
+
+  /**
+   * Build footer section with action buttons
+   * @private
+   * @returns {Array} Footer elements
+   */
+  _buildFooter() {
+    const primaryActions = [];
+    const secondaryActions = [];
+
+    if (this.isPublic) {
+      // Public view actions
+      const viewBtn = this.createElement('button', {
+        className: 'btn btn-small btn-primary',
+        onclick: () => this.onViewDetails(this.vacancy._id)
+      }, ['View Details']);
+      primaryActions.push(viewBtn);
+
+      if (this.currentUser) {
+        if (!this.hasApplied) {
+          const applyBtn = this.createElement('button', {
+            className: 'btn btn-small btn-secondary',
+            onclick: () => this.onApply(this.vacancy._id)
+          }, ['Apply']);
+          secondaryActions.push(applyBtn);
+        } else {
+          const appliedBadge = this.createElement('span', {
+            className: 'applied-badge'
+          }, ['Applied']);
+          secondaryActions.push(appliedBadge);
+        }
+      }
+    } else {
+      // Organization admin view actions
+      const editBtn = this.createElement('button', {
+        className: 'btn btn-small btn-secondary',
+        onclick: () => this.onEdit(this.vacancy._id)
+      }, ['Edit']);
+      primaryActions.push(editBtn);
+
+      const appsBtn = this.createElement('button', {
+        className: 'btn btn-small btn-primary',
+        onclick: () => this.onViewApplications(this.vacancy._id)
+      }, ['Applications']);
+      primaryActions.push(appsBtn);
+    }
+
+    return Card.createFooterWithActions({
+      primaryActions,
+      secondaryActions,
+      createElement: this.createElement
+    });
+  }
+}
+
+// Keep backward compatibility with functional API
+export function createVacancyCard(options) {
+  const card = new VacancyCard(options);
+  return card.render();
 }

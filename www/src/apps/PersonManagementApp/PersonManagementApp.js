@@ -783,7 +783,7 @@ class PersonManagementApp extends MiniApp {
     const hiringManagementAppBtn = this.createElement('button', {
       className: 'btn btn-secondary',
       onClick: () => this.RecruitmentManagementApp()
-    }, ['🛠️ Job Vacancies']);
+    }, ['💼 Job Vacancies']);
 
     actions.appendChild(tasksBtn);
     actions.appendChild(notesBtn);

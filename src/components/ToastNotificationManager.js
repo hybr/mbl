@@ -98,6 +98,18 @@ class ToastNotificationManager {
    */
   show(message) {
     try {
+      // Validate message
+      if (!message || !message._id) {
+        this.logger.error('Invalid message object:', message);
+        return;
+      }
+
+      // Check if toast is already shown
+      if (this.toasts.has(message._id)) {
+        this.logger.debug(`Toast already shown: ${message._id}`);
+        return;
+      }
+
       // Check max toasts limit
       if (this.toasts.size >= this.maxToasts) {
         this.removeOldest();
@@ -106,11 +118,13 @@ class ToastNotificationManager {
       // Create toast element
       const toastElement = this.createToastElement(message);
 
-      // Add to container
-      this.container.appendChild(toastElement);
-
-      // Store reference
+      // IMPORTANT: Store reference BEFORE adding to DOM
+      // This ensures the toast is in the map when close button becomes clickable
       this.toasts.set(message._id, toastElement);
+      this.logger.debug(`Toast stored in map: ${message._id}`);
+
+      // Add to container (makes it visible and clickable)
+      this.container.appendChild(toastElement);
 
       // Trigger animation
       setTimeout(() => {
@@ -132,6 +146,10 @@ class ToastNotificationManager {
 
     } catch (error) {
       this.logger.error('Failed to show toast:', error);
+      // Cleanup if toast was partially created
+      if (message && message._id) {
+        this.toasts.delete(message._id);
+      }
     }
   }
 
@@ -171,10 +189,13 @@ class ToastNotificationManager {
     closeBtn.className = 'toast-close';
     closeBtn.innerHTML = '&times;';
     closeBtn.setAttribute('aria-label', 'Close notification');
+    closeBtn.setAttribute('type', 'button');
     closeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
       e.stopPropagation();
+      this.logger.debug(`Close button clicked for toast: ${message._id}`);
       this.dismiss(message._id);
-    });
+    }, false);
 
     // Assemble toast
     toast.appendChild(iconElement);
@@ -224,29 +245,49 @@ class ToastNotificationManager {
    * Dismiss a toast
    */
   dismiss(messageId) {
-    const toast = this.toasts.get(messageId);
+    try {
+      const toast = this.toasts.get(messageId);
 
-    if (!toast) {
-      this.logger.warn(`Toast not found: ${messageId}`);
-      return;
-    }
-
-    // Trigger exit animation
-    toast.classList.remove('toast-show');
-    toast.classList.add('toast-hide');
-
-    // Remove after animation
-    setTimeout(() => {
-      if (toast.parentNode) {
-        toast.parentNode.removeChild(toast);
+      if (!toast) {
+        this.logger.warn(`Toast not found: ${messageId}`);
+        return;
       }
-      this.toasts.delete(messageId);
 
-      // Emit event
-      eventBus.emit('toast:dismissed', { id: messageId });
+      // Check if toast is already being dismissed
+      if (toast.classList.contains('toast-hide')) {
+        this.logger.debug(`Toast already being dismissed: ${messageId}`);
+        return;
+      }
 
-      this.logger.debug(`Toast dismissed: ${messageId}`);
-    }, 300); // Match CSS animation duration
+      // Trigger exit animation
+      toast.classList.remove('toast-show');
+      toast.classList.add('toast-hide');
+
+      // Remove after animation
+      setTimeout(() => {
+        try {
+          // Remove from DOM (modern approach)
+          if (toast.isConnected) {
+            toast.remove();
+          }
+
+          // Remove from map
+          this.toasts.delete(messageId);
+
+          // Emit event
+          eventBus.emit('toast:dismissed', { id: messageId });
+
+          this.logger.debug(`Toast dismissed: ${messageId}`);
+        } catch (err) {
+          this.logger.error(`Error removing toast from DOM: ${messageId}`, err);
+          // Force remove from map even if DOM removal fails
+          this.toasts.delete(messageId);
+        }
+      }, 300); // Match CSS animation duration
+
+    } catch (error) {
+      this.logger.error(`Error dismissing toast: ${messageId}`, error);
+    }
   }
 
   /**

@@ -122,7 +122,7 @@ export function renderProfileView(app) {
   const hiringManagementAppBtn = app.createElement('button', {
     className: 'btn btn-secondary',
     onClick: () => app.RecruitmentManagementApp()
-  }, ['🛠️ Job Vacancies']);
+  }, ['💼 Job Vacancies']);
 
   actions.appendChild(tasksBtn);
   actions.appendChild(notesBtn);
